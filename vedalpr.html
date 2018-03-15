@@ -1,0 +1,317 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>VEDA LPR engine</TITLE>
+   <META NAME="GENERATOR" CONTENT="Notepad">
+   <META NAME="Author" CONTENT="VEDA">
+   <META NAME="Description" CONTENT="License Plate Recognition SDK, Automatic Number Plate Recognition SDK, LPR SDK, ALPR SDK, ANPR SDK, API">
+   <META NAME="Keywords" CONTENT="LPR SDK, ALPR SDK, ANPR SDK, API, OCR, License Plate Recognition SDK, Automatic Number Plate Recognition SDK, Optical Character Recognition, Image Analysis, Image Processing, Computer Vision">
+   <META NAME="Classification" CONTENT="LPR SDK, ALPR SDK, ANPR SDK, API, OCR, License Plate Recognition SDK, Automatic Number Plate Recognition SDK, Optical Character Recognition, Computer Vision">
+</HEAD>
+
+<!--BODY BACKGROUND="recbg.jpg"-->
+<BODY BACKGROUND="recbg.jpg" bgproperties="fixed">
+
+<a name="top"></a>
+
+<HR WIDTH="100%">
+
+<CENTER>
+<dl>
+
+<DT><B><font face="Arial" size="5"><font color="#CC00CC"><i>(Rel. Dec. 2015)</i></font>&nbsp;&nbsp; VEDA LPR - V.2.1</font></B></DT>
+<DT><B><I><font color="#008080" face="Arial" size="3">(Software solution for Automatic Number / License Plates Recognition)</font></I></B></DT>
+
+<P>
+<b><font face="Arial" size="3" color="#0000a0">
+<MARQUEE SCROLLDELAY="22" BGCOLOR="#e0e0e0" WIDTH="300">
+*** Try our LPR engine on your own images ! ***
+A free Demo can be downloaded !!! (See below) ***
+</MARQUEE>
+</font></b>
+
+<br>
+
+<img border="0" src="numbs.jpg" width="300" height="200">
+</P>
+
+<p align="center">
+<font face="Arial" size="2">
+[ <a HREF="#download">Free DEMO download available!</a> ] &nbsp;&nbsp;&nbsp;
+[ <a HREF="vlprsdk.html">VEDA LPR engine SDK/API</a> ] &nbsp;&nbsp;&nbsp;
+[ <a HREF="index.html" target="_top">VEDA main page</a> ]
+</font>
+</p>
+
+</dl>
+</CENTER>
+
+<HR WIDTH="100%">
+
+<H1><font face="Arial"><BR>
+<B><FONT SIZE=+1 color="#000080">GENERAL DESCRIPTION</FONT></B></font></H1>
+
+<UL>
+
+<P><font face="Arial">
+
+<b>VEDA LPR</b> represents our current software solution in the domain of
+vehicle <b><FONT COLOR="#FF0000">license plate recognition (LPR)</FONT></b>, being
+intended to automatically identify and recognize / &quot;read&quot; such license
+plates in digital images.
+<br><br>
+The <b>VEDA LPR</b> engine not only represents an (Windows / <font color="#F00000">
+32-bit</font>) extension, but almost a completely new design, development and
+implementation, started from an old (DOS / 16-bit) LPR / ALPR / ANPR approach of
+ours, namely <b> VEDA CAR</b> (1993-94).
+
+<br><br>
+
+The software may use, as input, both color and grayscale image files (grabbed
+either by video cameras or by digital photo ones), and raw 256 gray levels
+images already "prepared" in (a buffer of) the computer memory. It doesn't depend on
+any specific image acquisition board (frame grabber). Supported image file formats
+include: JPEG, PNG, PCX, BMP, TIFF and IMG (Imaging Technology 256 gray levels
+uncompressed format).
+
+<br><br>
+
+<b>VEDA LPR</b> isn't directly meant as a universal and ready-to-run solution,
+but merely as a foundation on which we/one can build customized <b> ANPR / ALPR
+specific applications</b>.
+
+<br><br>
+
+Thus, once interfaced with some specific image acquisition chain (camera, frame
+grabber, triggering devices), possibly a controller for an access device (gate /
+barrier), and a database management software, the <b> VEDA LPR engine</b> can be
+easily used to monitorize, control and/or validate the access in restricted areas,
+public and/or private parking lots or garages, to monitorize highway (or other
+roads) traffic, red-light or speed limit infringements, to control the input /
+output at customs, toll collection points, etc.
+
+<br><br>
+
+A <a HREF="vlprsdk.html"><b> VEDA LPR engine SDK / API</b></a> is available for
+developers / integrators.
+
+</font></P>
+
+</UL>
+
+<H1><font face="Arial"><BR>
+<B><FONT SIZE=+1 color="#000080">USED METHOD</FONT></B>
+</font></H1>
+
+<UL>
+
+<P><font face="Arial">
+Same as for VEDA CAR, we designed the new LPR engine as having two main parts:
+an <FONT COLOR="#F00000">image segmentation subsystem </FONT> and a
+<FONT COLOR="#F00000">recognition / training (OCR) subsystem</FONT>.
+The first one is meant to globally analyze a 256 gray levels input image and to
+find the area(s) of interest potentially containing alphanumeric characters.
+Once such an area found, it is converted to a monochrome bitmap, using a smart,
+adaptive, binarization technique. Some &quot;noise&quot; filters and geometrical
+distortions (skew, slant, rotation) compensation algorithms are then applied on
+the obtained black and white bitmap. The next target is to split this bitmap
+into rows of text (if needed), and these ones into their component characters.
+Vectors of appropriate parameters are generated starting from these character
+bitmaps, as internal representations for each one. These vectors are then
+passed further as input to the second subsystem.
+At this level, if the purpose is recognition, a powerful neural-like pattern
+classification algorithm is used to &quot;identify&quot; them, based on (one
+or more) existing OCR knowledge bases. If the purpose is training a (selected)
+knowledge base, specific representations (patterns) derived for each character
+sample, explicitly &quot;tagged&quot; interactively by the user, are &quot;learned&quot;.
+A dedicated user interface is provided for this purpose.
+Thus, on further recognition sessions, the system's experience is enhanced, and,
+after a number of training sessions, the knowledge becomes good enough to ensure
+average recognition rates above 99%.
+</font></P>
+
+<P><font face="Arial">
+In order to be as fast as possible, the global image segmentation system
+(interest area finder) doesn't use traditional image analysis techniques
+such as Fourier analysis, Sobel or Laplace edge detection methods and the
+likes. Instead, we developed a &quot;contrast vaults&quot; analysis method
+and algorithm for providing the most effective results. Briefly, a fast,
+image-to-&quot;contrast vaults&quot; measure map, transformation is performed
+on a per-block basis, i.e. a numeric value derived from an average &quot;contrast
+vaults&quot; measurement is attached to each block.
+Next, a conventional (histogram-based) method is applied on that map for finding
+a proper segmentation threshold, meant to isolate &quot;blobs&quot; from the
+background. Some filtering and connectivity analysis are applied on the initially
+retained &quot;runs&quot; of blocks in order to obtain the candidate blobs.
+These latter ones are subject of a blobs filtering process, and only the
+appropriate ones are kept. Usually, area(s) containing the car license plate
+proves to be (among) the remained &quot;blob(s)&quot;. Once the interest
+area(s) thus segmentated, a smart, adaptive threshold based binarization (using
+some statistical methods and several test points) is performed, and black/white
+resulted bitmap(s) is (are) filtered of &quot;noise&quot;, de-skewed/de-slanted,
+and finally passed further for segmentation to the recognition (or, respectively,
+to the training) subsystem.
+</font></P>
+
+<P><font face="Arial">
+The recognition / training (OCR) subsystem is based on one of our proprietary
+approaches / technologies in the field of neural and not-neural but somehow alike
+classifiers. This technology features a high degree of noise tolerance and power
+of generalization. It practically allows to learn and to further recognize any
+graphic symbol. It is also used as the basic recognition / training engine for our
+<a HREF="neurocr3.html">VEDA OCR/NeurOCR</a> application.
+</font></P>
+
+<P><font face="Arial">
+Our training experiments focused on car license plates were performed on several
+hundreds (even thousands) of color and gray levels images, taken in various
+conditions and at different resolutions (e.g. 640x480, 768x512, 768x576, 800x600,
+1024x768, 1384x1030, and other - both lesser and greater - ones), with quite
+various framing of the vehicles in the captured scenes also. These vehicles
+mainly included Romanian (RO), French (F), Italian (I), Dutch (NL), German (D),
+British (GB), Spanish (E), Slovakian (SK), Czech (CZ), Israeli (IL),
+Brasilian (BR) and Hong Kong (HK) car license plates, but also American (USA),
+Mexican (MEX), Belgian (B), Greek (GR), Turkish (TR), Australian (AU), and other
+ones. This amount of training finally ensured very good average recognition
+ratios. We emphasize again that the recognition / training system can, in fact,
+recognize/learn any kind of machine printed text, if properly segmentated within
+the image. For avoiding possible confusions / misnomers (like '1' with 'I', '0'
+with 'O' or 'D', '8' with 'B', etc.) in real(-time) applications, a customized
+list of allowed number formats / syntaxes may be defined and used as a
+post-recognition automatic correction guide, from case to case, in such specific
+applications.
+</font></P>
+
+</UL>
+
+<H1><font face="Arial"><BR>
+<b><font size="+1" color="#000080">HIGHLIGHTS</font></b></font></H1>
+
+<UL>
+
+<LI><font face="Arial">
+<I><FONT COLOR="#F00000">Modern, neural-like, trainable OCR</FONT></I> enables a great
+recognition flexibility providing noise tolerance and the ability to cope with various
+text fonts, positions and dimensions, by means of <I><FONT COLOR="#F00000">learning</FONT></I>.
+</font></LI>
+
+<LI><font face="Arial">
+<i><font color="#F00000">International number plates</font></i> recognition, with
+<i><font color="#F00000">various dimensions and aspect ratios</font></i>, painted in
+<i><font color="#F00000">various colors</font></i>, both <font color="#F00000"><i>dark/light
+and light/dark</i></font>, provided that they contain separable uppercase letters (from a latin-like
+alphabet) and digits, all of almost equal (comparable) height among each other, placed in one or two
+overposed rows.
+</font></LI>
+
+<LI><font face="Arial">
+<I><FONT COLOR="#F00000">Strong noise tolerance</FONT></I>, required because of
+<font color="#F00000"><i> various lighting conditions</i></font> (indoor, outdoor, natural/IR
+light, uncontrolled reflections, dirt, etc.), and to compensate some of the acquisition
+process / equipment limitations.
+</font></LI>
+
+<LI><font face="Arial">
+<I><FONT COLOR="#F00000">Great recognition speed</FONT></I> (e.g. about 30-500 milliseconds
+for a 768x512, 8 bits/pixel 256 gray levels image, on an &quot;old&quot; P4 at 1.5GHz PC
+with 512MB RAM).
+</font></LI>
+
+<LI><font face="Arial">
+<I><FONT COLOR="#F00000">Interactive training</FONT></I> performed on a per-case
+basis from static images, being, practically, a real time process (&quot;train and test&quot;).
+</font></LI>
+
+<LI><font face="Arial">
+<I><FONT COLOR="#F00000">Smart (auto-tuneable) contrast &quot;texture&quot; analysis</FONT></I> technique
+for <i><font color="#F00000"> fast and accurate detection/segmentation of the license plate region</font></i>.
+</font></LI>
+
+<LI><font face="Arial">
+<i><font color="#F00000">Automatic compensation of geometrical distortions</font></i>
+(license plate skew, slant, and/or rotation, 3D perspective effects).
+</font></LI>
+
+<LI><font face="Arial">
+<I><FONT COLOR="#F00000">Independence on the acquisition equipment</FONT></I>
+(camera and frame grabber), the only restrictions referring to reasonable overall
+quality of the images and spatial resolution (recommended in the range of 640x480 -
+1024x768 pixels), appropriate framing of the vehicle with appropriate camera zoom
+and focus.
+</font></LI>
+
+</UL>
+
+<P><font face="Arial">
+<B><FONT SIZE=+1>
+<br><br>
+<font color="#000080"><a name="download">DEMO DOWNLOADING</a></font>
+</FONT></B>(aprox. 2.96 Mb)
+</font></P>
+
+<UL>
+
+<P>
+<font face="Arial">You can download a <b><font color="#FF0000">FREE</font>
+<FONT COLOR="#008000">DEMO</FONT></b> application of <b> VEDA LPR</b> (for
+Windows / 32-bit), from <a HREF="vedalpr.zip">HERE</a>. What you'll get after
+downloading will be a <B><TT><FONT SIZE=+1 color="#008000">vedalpr.zip</FONT></TT></B>
+archive file which must be &quot;unzipped&quot; in a (preferably new, empty) directory / folder
+on your Windows based computer. This &quot;ZIP&quot; file usually contains a
+<B><TT><FONT SIZE=+1 color="#008000">readme.txt</FONT></TT></B> text file (which
+is recommended to be read firstly in order to correctly install and run the DEMO),
+and an automatic installer of all the necessary archived files:
+<B><TT><FONT SIZE=+1 color="#008000">install.bat</FONT></TT></B> (which must be
+run in order to get all the required files extracted on your hard disk).
+Finally, you can use the extracted DEMO application
+(<B><TT><FONT SIZE=+1 color="#008000">vedalpr.exe</FONT></TT></B>), or the character
+patterns training utility / tool (<B><TT><FONT SIZE=+1 color="#008000">vedapatt.exe</FONT></TT></B>)
+if you want to build/update an OCR knowledge base using some images of your own.
+Please note that, when trying the DEMO, you must first select the image files to
+test it on, and the OCR knowledge base to be used. The demonstration can then be
+started to either automatically load and analyze image after image, with an
+adjustable delay between them (for seeing the segmentation and recognition
+result for each one), or, manually, step by step, one image (next/previous) at a
+time.</font> 
+</P>
+
+</UL>
+
+<CENTER><P>
+<font face="Arial"><BR>[ <a HREF="vedalpr.zip">Download free DEMO now !</a> ]</font>
+</P></CENTER>
+
+<UL>
+
+<P><font face="Arial"><BR>
+We shall always appreciate comments and suggestions about our <B>VEDA LPR</B>
+engine.</font></P>
+
+</UL>
+
+<P align="right"><font face="Arial" size="2"><a HREF="#top">[ Top of page ]</a></font>
+
+<HR WIDTH="100%">
+
+<UL>
+<P><B><font face="Arial" size="3">CONTACT:&nbsp;&nbsp;&nbsp;
+<a href="mailto:mvrejoiu [at] yahoo [dot] com">Mr. Mihnea VREJOIU</a>
+</font></B></P>
+</UL>
+
+<HR WIDTH="100%">
+
+<CENTER>
+
+<TABLE BORDER=5 CELLSPACING=3 CELLPADDING=3 >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD BGCOLOR="#E0FFFF"><A HREF="index.html" target="_top">Go to VEDA main page</A></TD>
+</TR>
+</TABLE>
+
+</CENTER>
+
+<HR WIDTH="100%">
+
+</BODY>
+</HTML>

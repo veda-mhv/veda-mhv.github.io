@@ -1,0 +1,243 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>VEDA LPR engine SDK / API</TITLE>
+   <META NAME="GENERATOR" CONTENT="Notepad">
+   <META NAME="Author" CONTENT="VEDA">
+   <META NAME="Description" CONTENT="License Plate Recognition SDK, Automatic Number Plate Recognition SDK, LPR SDK, ALPR SDK, ANPR SDK, API">
+   <META NAME="Keywords" CONTENT="LPR SDK, ALPR SDK, ANPR SDK, API, OCR, License Plate Recognition SDK, Automatic Number Plate Recognition SDK, Optical Character Recognition, Image Analysis, Image Processing, Computer Vision">
+   <META NAME="Classification" CONTENT="LPR SDK, ALPR SDK, ANPR SDK, API, OCR, License Plate Recognition SDK, Automatic Number Plate Recognition SDK, Optical Character Recognition, Computer Vision">
+</HEAD>
+
+<!--BODY BACKGROUND="recbg.jpg"-->
+<BODY BACKGROUND="recbg.jpg" bgproperties="fixed">
+
+<FONT face="Arial">
+
+<a name="top"></a>
+
+<HR WIDTH="100%">
+
+<CENTER>
+<dl>
+
+<DT><B><font size="5"><font color="#CC00CC"><i>(Rel. Dec. 2015)</i></font>&nbsp;&nbsp;
+VEDA LPR engine V.2.1 - SDK / API</font></B></DT>
+<DT><B><I><font color="#008080" size="3">(for ANPR/ALPR applications developers)</font></I></B></DT>
+
+<P>
+<b><font size="3" color="#0000a0">
+<MARQUEE SCROLLDELAY="22" BGCOLOR="#e0e0e0" WIDTH="300">
+*** Test our LPR engine SDK/API integration within your application(s) ! ***
+A free Demo LPR SDK / API can be downloaded !!! (See below) ***
+</MARQUEE>
+</font></b>
+<br>
+<img border="0" src="numbs.jpg" width="300" height="200">
+</P>
+
+<p align="center">
+<font size="2">
+[ <a HREF="#download">Demo SDK/API download available!</a> ] &nbsp;&nbsp;&nbsp;
+[ <a HREF="vedalpr.html">VEDA LPR Demo application</a> ] &nbsp;&nbsp;&nbsp;
+[ <a HREF="index.html" target="_top">VEDA main page</a> ]
+</font>
+</p>
+
+</dl>
+</CENTER>
+
+<HR WIDTH="100%">
+
+<H1>
+<BR>
+<B><FONT SIZE=+1 color="#000080">BRIEF GENERAL DESCRIPTION</FONT></B>
+</H1>
+
+<UL>
+<P>
+
+The <b>VEDA LPR engine SDK/API</b> is a software library providing License Plate Recognition (LPR) core functions that can be smoothly integrated for development of Automatic Number Plate Recognition (ANPR) based applications.
+<br><br>
+It mainly consists of a <font color="#f00000">Windows / 32-bit DLL</font> (<B><TT><FONT SIZE=+1 color="#008000">lprcore.dll</FONT></TT></B>), offering four (4) API functions, implemented using the <B><TT><FONT SIZE=+1 color="#000080">__stdcall</FONT></TT></B> convention: two for allocating / initializing, and respectively releasing / freeing the LPR i/o data structure, i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_init()</FONT></TT></B> and <B><TT><FONT SIZE=+1 color="#000080">LPR_cleanup()</FONT></TT></B>, a main one, i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_get_number()</FONT></TT></B>, and an auxiliary one, i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_free_number_structures()</FONT></TT></B>, which, for most of the applications, is very likely to be never used. Here are a few more words about each of these functions:
+<br>
+
+<ul>
+
+<li>
+The first one (i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_init</FONT></TT></B>) uses as argument the fully qualified path to the OCR knowledge base file (KBF) to be used for plate recognition (given as a 32-bit address - pointer to char - of the respective NULL terminated string). It loads the contents of the specified KBF in memory, and also internally allocates the LPR i/o data structure which represents the data exchange interface between application(s) and the SDK, that will be used when calling the main (and auxiliary) function(s). The <B><TT><FONT SIZE=+1 color="#000080">LPR_init</FONT></TT></B> function returns the 32-bit memory address (i.e. a pointer) of this allocated structure. This function is usually used only once by the calling application, prior to any other function of the SDK. It may also be used further, either for replacing the currently loaded OCR knowledge base by loading another specified one, or simply for re-initializing / re-setting the respective LPR i/o data structure contents (not its address!) at any moment.
+<br><br>
+</li>
+
+<li>
+The second function (i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_cleanup</FONT></TT></B>) deallocates the above mentioned LPR i/o data structure and all other LPR and OCR related dinamically allocated data, including the current (last loaded) OCR knowledge base. It has no argument and returns no value.
+<br><br>
+</li>
+
+<li>
+The main function (i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_get_number</FONT></TT></B>) uses as <i><b>input</b></i>:
+<ul>
+- <b>either</b> an already allocated and filled (by the calling application) <font color="#0000f0">gray scale raw image buffer / array</font> (e.g. got from a frame buffer of the input video stream), "normalized" to max. 256 gray levels, pixel per byte, line after line contiguously, left->right & top->down), and its respective <font color="#0000f0">width</font> and <font color="#0000f0">height</font> values in pixels, <b>or alternatively</b>, an <font color="#0000f0">image file</font>'s (color or grayscale, in one of the following formats: JPEG, PNG, PCX, BMP, TIFF, IMG - an old uncompressed grayscale format used with Imaging Technology frame grabbers) fully qualified path, <b>and</b>,
+<br>
+- the "<font color="#0000f0">analysis depth</font>" parameter, as a 32-bit integer value from 1, 2, 3, 4 and 5, that indicates how "deep" the image analysis is to be performed for locating / segmentating the license plate (greater values meaning stronger analysis, but sometimes implying slight to significant longer analysis duration).
+</ul>
+Its <i><b>output</b></i> consists in:
+<ul>
+- three (3) NULL terminated character strings, containing respectively: the recognized <font color="#0000f0">license/number</font>, the current system <font color="#0000f0">date</font> (including also the index of the <font color="#0000f0">day of week</font>, Sunday = 0, Monday = 1, ...), and the <font color="#0000f0">local time</font>,
+<br>
+- a 32-bit integer representing the processing <font color="#0000f0">duration</font>,
+<br>
+- optionally, a 32-bit integer value representing the <font color="#0000f0">number of license plate's areas / fields that were found</font>, and the "head" (as a 32-bit memory address / pointer) of <font color="#0000f0">a chained list of data structures specific to these ones</font> (including details like: their coordinates, associated b/w raw bitmaps pixel/bit, width, height, etc.), if the value for their number parameter was initialized with a non-negative value (i.e. 0) instead of a negative value (i.e. -1) before calling the function.
+</ul>
+All the above data are exchanged through the LPR i/o structure whose address was returned by the <B><TT><FONT SIZE=+1 color="#000080">LPR_init</FONT></TT></B> function described here above.
+<br><br>
+A 32-bit integer <font color="#0000f0">error code</font> is also returned by this function, a value of zero (0) meaning "no error".
+<br><br>
+<i><b>Note:</b></i>
+<br>
+~~~~~
+<br>
+In the case of the Demo API/SDK (see below), the output of the above function is partially faked on purpose, i.e.:
+<ul>
+- the &quot;recognized&quot; license plate string is always in the form DUMMY.01, or DUMMY.01.DUMMY.02 respectively, for license plates with two rows;
+<br>
+- the content of the b/w bitmaps is altered, and their respective coordinates relative to the source image are artificially shifted to the top and left of this one, while still preserving the respective heights and widths.
+</ul>
+However, all the output data (although thus deliberately faked) is made available to the calling application, provided that the appropriate input data were given, and all the initializations were correctly made.
+<br><br>
+</li>
+
+<li>
+The auxiliary function (i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_free_number_structures</FONT></TT></B>) frees from memory the license plate field(s) details data (e.g. binarized bitmap(s) pixel/bit, their coordinates in pixels relative to the whole image, width, height, etc.), in those cases when such data were explicitly requested (e.g. by initializing the last member of the i/o data structure with 0) when calling the LPR_get_number (main) function, and they were successfully made available to the application by this one. If no such "details" data were asked, this function shouldn't be used at all. It has no argument and returns no value.
+<br><br>
+</li>
+
+</ul>
+
+A <FONT color="#f00000">Windows / 32-bit C/C++</FONT> header file (i.e. <B><TT><FONT SIZE=+1 color="#008000">lpr.h</FONT></TT></B>), containing the types and interfacing data structures definitions, functions prototypes, and quite exhaustive description for all the above, and how to integrate them within applications, is provided by the SDK package as an API for developers, together with other (<B><TT><FONT SIZE=+1 color="#008000">DLLs, readme and license.txt</FONT></TT></B>) necessary files.
+<br><br>
+For using the library with other development languages or programming models (e.g. VB, DELPHI, .NET framework, etc.), the contents of this C/C++ header file should be appropriately translated and inserted in the respective source code, or appropriate wrappers have to be built (taking care to preserve the data and functions types, sizes, and calling conventions compatibilities, respectively).
+<br><br>
+The integration within application(s) should be however very rapid, smooth and easy.
+<br><br>
+The per image analysis duration depends on the performance of the host computer (type, model and frequency of the CPU), the digital image content, the OCR knowledge base (how adequate, accurate and well it was trained). It may thus usually range from a few, to hundreds of milliseconds.
+<br><br>
+An example for the <b>VEDA LPR engine SDK/API</b> library usage within a simple Windows / 32-bit C console application (i.e. <B><TT><FONT SIZE=+1 color="#008000">lprtest.c</FONT></TT></B>, and its respective executable form, <B><TT><FONT SIZE=+1 color="#008000">lprtest.exe</FONT></TT></B> files) is also included in the API/SDK package.
+<br><br>
+<i><b>Note:</b></i>
+<br>
+~~~~~
+<br>
+The <B><TT><FONT SIZE=+1 color="#008000">lprtest.exe</FONT></TT></B> Windows / 32-bit console example might be also used as a "wrapper" for using the VEDA LPR engine's main (recognition) function on individual image files from within an application written in any programming language without integrating the API itself. It uses 3 calling parameters (i.e. fully qualified path of the OCR knowledge base file to be used, fully qualified path of the source/target image file, and image analysis depth as an integer value ranging from 1 to 5) that should be given in the command line. It returns its output printed both on the screen and as a text file in the same path and having the same name with the source image, but the .txt extension. This file contains 4 lines (as CR+LF terminated character strings), representing: the recognized license plate, the date, and the time (given by the host system at the analysis moment), and the index of the day of the week (Sunday = 0). Applications may call the <B><TT><FONT SIZE=+1 color="#008000">lprtest.exe</FONT></TT></B> file as an external program, and then get its output, as needed, from the respective text lines of the aforementioned output file.
+<br><br>
+<i><b>Remark:</b></i>
+<br>
+~~~~~~~
+<br>
+Each copy of the <b>VEDA LPR engine SDK/API</b> is individualized through a specific internal Serial Number (S/N), and its usage is protected by a &quot;software key&quot; (not a hardware dongle!), i.e. by a License Activation Key (LAK), in the form of an ASCII text file. The LAK may be obtained after installing the SDK and trying to run it first time, by providing us back some info (i.e. a &quot;fingerprint&quot; of the host computer, together with the S/N uniquely identifying the respective SDK library), that is automatically displayed within a &quot;License infringement&quot warning message box, and is also stored within an ASCII text file, by the SDK functions when(ever) attempted to be used / run and the appropriate LAK isn't found. Moreover, without a valid LAK, these SDK functions aren't working at all.
+<br>
+
+</P>
+</UL>
+
+<H1>
+<BR>
+<B><FONT SIZE=+1 color="#000080">THE DEMO SDK / API RELEASE</FONT></B>
+</H1>
+
+<UL>
+<P>
+
+The Demo consists of a &quot;fake&quot; / &quot;dummy&quot; (and partial) <b>VEDA LPR engine SDK/API</b> for <FONT color="#f00000">Windows / 32-bit</FONT>. It may be used, as a temporary substitute for the real one, solely for application(s) development / integration test and evaluation purposes. It doesn't provide real results, but, instead, some &quot;dummy&quot; ones. However, it certainly may be helpful while developing applications and want to estimate the programming effort and test the integration mechanisms (i.e. functions calls, parameters and i/o data exchange) before getting and using the real VEDA LPR engine functionality.
+<br><br>
+This &quot;fake&quot; SDK / API allows developers to:
+<ul>
+- test the integration of the SDK functions within their application(s);
+<br>
+- check if the parameters / data exchange with the SDK works as expected;
+<br>
+- make an approximative idea about the duration of the LPR involved processings, since the image segmentation part, which is the most time consuming, is however performed (even if not making available its real results and the OCR functions that are normally applied on the respective ones are not included at all in the &quot;fake&quot; SDK).
+</ul>
+<br>
+<i><b>Remarks:</b></i>
+<br>
+~~~~~~~~
+<br>
+- In fact, only the main DLL (<B><TT><FONT SIZE=+1 color="#008000">lprcore.dll</FONT></TT></B>) is a &quot;fake&quot; one, all the other included components being the real ones.
+<br>
+- While for each and any real SDK license (either being a &quot;developer&quot; or a &quot;run-time&quot; one), identifiable through an unique Serial Number (S/N), a License Activation Key (LAK) is mandatory to be obtained, no S/N is provided and <b><font color="#008000">no activation (LAK) is required for using the &quot;fake&quot; SDK / API</font></b>.
+<br>
+- Please note that, even if it might be used as it is for complete applications development, the Demo (&quot;fake&quot;) SDK / API is intended for integration test and evaluation purposes only, while for deploying / integrating real applications using the <b>VEDA LPR engine SDK / API</b>, &quot;developer&quot; licenses are however mandatory to be acquired.
+<br>
+- For really testing the license plates recognition rates and speed (including not only the segmentation, but also the recognition duration), besides the &quot;fake&quot; SDK / API, a fully working <a HREF="vedalpr.html#download"><b>VEDA LPR free DEMO application</b></a> is provided and may be downloaded (from its respective page) and used.
+<br>
+- The VEDA LPR engine (in fact the VEDA OCR/NeurOCR engine on which it relies on) is trainable, and a training utility / tool is also provided with the VEDA LPR free DEMO application (see above).
+<br>
+
+</P>
+</UL>
+
+<H1>
+<BR>
+<B><FONT SIZE=+1 color="#000080"><a name="download">DEMO SDK DOWNLOADING</a></FONT></B><font face="arial" size=-1> (aprox. 540 Kb)</font>
+</H1>
+
+<UL>
+<P>
+You can download a <b><font color="#FF0000">FREE</font>
+<FONT COLOR="#008000">DEMO</FONT></b> release of the <b> VEDA LPR engine SDK / API
+</b> (Windows / 32-bit) from <a HREF="fake_lpr.zip">HERE</a>. What you'll get when
+downloading will be a <B><TT><FONT SIZE=+1 color="#008000">fake_lpr.zip</FONT></TT></B>
+archive file.
+The contents of this one must be initialy extracted into an empty directory/folder on
+your computer and all the necessary archived files &quot;unpacked&quot by running the
+<B><TT><FONT SIZE=+1 color="#008000">install.bat</FONT></TT></B> one.
+Among the unpacked files that you'll get, there will also be a
+<B><TT><FONT SIZE=+1 color="#008000">readme.txt</FONT></TT></B> text one, which is
+recommended to be read before starting to use the SDK.
+</P>
+</UL>
+
+<CENTER>
+<P>
+<BR>
+[ <a HREF="fake_lpr.zip">Download free DEMO SDK now !</a> ]
+</P>
+</CENTER>
+
+<UL>
+<P>
+<BR>
+Any feedback upon our <B>VEDA LPR engine SDK/API</B> will be always welcomed.
+</P>
+</UL>
+
+<P align="right"><font size="2"><a HREF="#top">[ Top of page ]</a></font></P>
+
+<HR WIDTH="100%">
+
+<UL>
+<P>
+<B><font size="3">CONTACT:&nbsp;&nbsp;&nbsp;
+<a href="mailto:mvrejoiu [at] yahoo [dot] com">Mr. Mihnea VREJOIU</a>
+</font></B>
+</P>
+</UL>
+
+</FONT>
+
+<HR WIDTH="100%">
+
+<CENTER>
+<TABLE BORDER=5 CELLSPACING=3 CELLPADDING=3 >
+<TR ALIGN=CENTER VALIGN=CENTER>
+<TD BGCOLOR="#E0FFFF"><A HREF="index.html" target="_top">Go to VEDA main page</A></TD>
+</TR>
+</TABLE>
+</CENTER>
+
+<HR WIDTH="100%">
+
+</BODY>
+</HTML>
