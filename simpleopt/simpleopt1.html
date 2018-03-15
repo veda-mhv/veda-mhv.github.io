@@ -1,0 +1,677 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <META http-equiv=Content-Language content=en-us>
+   <META http-equiv=Content-Type content="text/html; charset=windows-1252">
+   <META name="Classification" content="SimpleOpt, general purpose optimizer, optimization problem, Python">
+   <META name="Description" content="SimpleOpt, general purpose optimizer, optimization problem, Python">
+   <META name="GENERATOR" content="Notepad">
+   <META name="Keywords" content="SimpleOpt, general purpose optimizer, optimization problem, Python">
+   <TITLE>A General Purpose Optimization Tool (1)</TITLE>
+</HEAD>
+
+<BODY>
+
+<P align=center><FONT color=#008000>[Last updated on: Thursday, March 04, 2009]</FONT></P>
+<P align=center>&nbsp;</P>
+<P align=center>&lt; <a href="index.html">Go to SimpleOpt main page</a> &gt;</P>
+<P align=center>&nbsp;</P>
+<P align=center><font size="5"><b>The SimpleOpt algorithm.<br>
+Its application to general purpose optimization problems</b></font></P>
+<P align=center>&nbsp;<br>
+<FONT face="Times New Roman">
+Copyright &copy; 2003, by Dan Mugurel Ontanu &amp; Mihnea Horia Vrejoiu
+</FONT>
+<br>&nbsp;<br>&nbsp;<br></P>
+<P 
+align=left><B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<A name=Contents:>Contents:</A></B></P>
+<P 
+align=left>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+1. <a href="#1. Introduction">Introduction</a><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+2. <a href="#2. A simple example">A simple example</a><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+3. <a href="#3. The general framework for using the optimizer on custom defined problems">The 
+general framework for using the optimizer on user defined 
+problems</a><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+4. <a href="#4. An example of using the general framework for a 2-D function">An 
+example of using the general framework for a 2-D 
+function</a><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+5. <a href="#5. Conclusions">Conclusions</a><BR><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#DOWNLOADS:"><FONT size=2>DOWNLOAD</FONT></a></P>
+<P align=center>&nbsp;</P>
+<BLOCKQUOTE>
+  <BLOCKQUOTE>
+    <P><B><BR>ABSTRACT</B></P>
+    <P><FONT size=3>A simple, general purpose optimization tool has been 
+    designed and developed under the Python language. The purpose of this 
+    document is to describe some practical ways of using this tool from within 
+    other Python applications. The introduction (section 1) presents an overview 
+    of the category of problems the optimizer is intended for. For making things 
+    as attractive and easy understandable as possible, a simple example for the 
+    use of the optimizer on a 1-D sine function is provided first (in section 
+    2). Starting from this example, a general framework which can be used as a 
+    starting Python script skeleton for other user defined functions is then 
+    presented (section 3). Finally, a more complex example, of using the 
+    optimizer on a highly customizable 2-D function, using the above framework, 
+    is discussed (section 4). This document ends with some conclusions (section 
+    5) and a list of available downloads.</FONT></P>
+  </BLOCKQUOTE>
+</BLOCKQUOTE>
+<P>&nbsp;</P>
+
+<P><B><FONT size=4><BR><A name="1. Introduction">1. Introduction</A><BR></FONT></B></P>
+
+<P>The optimizer is intended to solve the general category of problems, which we 
+shall try to briefly describe in the following.</P>
+<P>Suppose that we have an objective function (F), defined on a subset (S) of 
+the real Euclidean n-dimensional space:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; F : S --&gt; <B>R</B>,&nbsp;&nbsp;
+where S is a
+subset of <B>R</B><SUP>n</SUP>.</P>
+<P>The subset S, is defined as a n-dimensional interval (a "hyper box"):</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S = [x<SUB>0 min</SUB>, x<SUB>0 
+max</SUB>] × ... × [x<SUB>i min</SUB>, x<SUB>i max</SUB>] × ... × [x<SUB>n-1 
+min</SUB>, x<SUB>n-1 max</SUB>],</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; with x<SUB>i min</SUB>, x<SUB>i 
+max</SUB> in <b>R</b>.</P>
+<P>We have to optimize this function. This means that we should find (ideally) 
+all the points X*, for which the function F has local maxima:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; F(X*) = max,</P>
+<P>and satisfying some constraints, given by a set of relations in the form 
+of:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; G<SUB>j</SUB>(X*) &lt;= 
+0,&nbsp;&nbsp; where j = 0 ... m - 1,&nbsp;&nbsp; X* in
+S.</P>
+<P>In conclusion, the optimization problem we have to deal with, could be 
+defined by the triplet: space, function, constraints &lt;S, F, G&gt;. In this 
+approach, each of the above elements is procedurally defined. This is an 
+alternative to the symbolic approach, used by other optimization algorithms (such
+as CONOPT).</P>
+<P>The algorithm consists in a simple incremental maximum search procedure in 
+the problem space S (restricted by the constraints G<SUB>j</SUB>), using 
+"flexible" point neighborhoods. It is implemented in Python in the form of two 
+modules named <B>problem.py</B> and <B>simpleopt.py</B>. The detailed 
+implementation of the optimization algorithm is not subject of this 
+document.</P>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+<P>&nbsp;</P>
+
+<P><BR><B><FONT size=4><A name="2. A simple example">2. A simple example</A></FONT></B></P>
+
+<P><BR>Let's first consider that we want to write a Python application which can 
+solve the concrete 1-D optimization problem of a sine function:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; F = sin(x),</P>
+<P>defined on:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S = [-0.9, 2pi + 0.1].</P>
+<P>A graph of this function is represented in figure 2.1.</P>
+<P>&nbsp;</P>
+<P align=center><IMG border=0 height=440 src="sine.gif" 
+width=631></P>
+<P align=center>Figure 2.1</P>
+<P align=center>&nbsp;</P>
+<P>We want to optimize this function, restraining only to the [0.5, 2pi] interval. This can be expressed by considering the 
+following system of two constraints:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; G<SUB>0</SUB>(x) = 0.5 – x &lt; 
+0,&nbsp;&nbsp; and&nbsp;&nbsp; G<SUB>1</SUB>(x) = x - 2pi &lt; 0.</P>
+<P>How can we express this simple optimization problem, using the Python 
+language?</P>
+<P>The problem space S, could be specified by a list of tuples (pairs), each 
+containing the bounds (i.e. a minimum value, and a maximum one) for each 
+coordinate. In our case, n = 1, so our list, let's name it <FONT 
+face="Courier New" size=2>mybounds</FONT>, contains only one tuple:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <FONT face="Courier New" 
+size=2>mybounds = [ (-0.9, 2*math.pi + 0.1) ].</FONT></P>
+<P>The objective function F, let's name it <FONT face="Courier New" 
+size=2>myeval(x)</FONT>, could be defined like this:</P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; def myeval(x): return 
+math.sin(x[0]).</FONT></P>
+<P>Please note that the formal parameter x must be a list of coordinates x[0], 
+…, x[i], …, x[n-1]. This is why we used the notation x[0] instead of x, for our 
+1-D example.</P>
+<P>The two constraints G<SUB>0</SUB> and G<SUB>1</SUB> could be specified as 
+only one function, <FONT face="Courier New" size=2>myconstraint(i, x)</FONT>, 
+like in the following:</P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; def myconstraint(i, 
+x):<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # This defines [0.5, 2pi] as 
+the allowed interval</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if 
+i == 0:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # constraint no. 
+1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if x[0] 
+&gt; 0.5: return 
+-1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else: 
+return 1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; elif i == 
+1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # constraint no. 
+2<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if x[0] 
+&lt; 2*math.pi: return 
+-1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else: 
+return 1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else: return 
+1&nbsp;&nbsp;&nbsp;&nbsp; # any other constraint...</FONT></P>
+<P>where <FONT face="Courier New" size=2>i</FONT> indicates the constraint which 
+should be evaluated for the current point <FONT face="Courier New" 
+size=2>x</FONT>.</P>
+<P>Well, things look quite simple until now. It's time to see how the above 
+definitions could be integrated in a working Python module which uses the 
+optimization algorithm implemented in the <B>problem.py</B> and 
+<B>simpleopt.py</B> modules.</P>
+<UL>
+  <LI>First of all, we must import the required functionalities, both from the 
+  modules which implement the optimizer, and from other Python modules 
+  (libraries). 
+  <LI>Then, we have to insert our previously described definitions (the problem 
+  space, as a collection of bounds, the objective function, and the 
+  constraints). 
+  <LI>Finally, we must write the executable part of the 
+  module:<BR>&nbsp;&nbsp;&nbsp; - specifying the optimization problem, and 
+  getting an instance of it,<BR>&nbsp;&nbsp;&nbsp; - creating a personalized 
+  instance of the optimizer,<BR>&nbsp;&nbsp;&nbsp; - executing the above 
+  instance of the optimizer (by calling the <FONT face="Courier New" 
+  size=2>optsearch</FONT> method). </LI></UL>
+<P>The Python program will look like this:</P>
+<P><FONT face="Courier New" size=2><BR>from problem import Problem<BR>from 
+simpleopt import SimpleOpt</FONT></P>
+<P><FONT face="Courier New" size=2>import math</FONT></P>
+<P><FONT face="Courier New" size=2># 
+------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>mybounds = [ (-0.9, 2*math.pi + 0.1) 
+]</FONT></P>
+<P><FONT face="Courier New" size=2>def myeval(x): return 
+math.sin(x[0])</FONT></P>
+<P><FONT face="Courier New" size=2>def myconstraint(i, x):<BR>&nbsp;&nbsp;&nbsp; 
+# This defines [0.5, 2pi] as the allowed interval</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; if i == 
+0:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # constraint nr. 
+1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if x[0] &gt; 0.5: return 
+-1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else: return 
+1<BR>&nbsp;&nbsp;&nbsp; elif i == 1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # 
+constraint nr. 2<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if x[0] &lt; 
+2*math.pi: return -1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else: return 
+1<BR>&nbsp;&nbsp;&nbsp; else: return 1&nbsp;&nbsp;&nbsp;&nbsp; # any other 
+constraint...</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># Program 
+starting point<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>if __name__ == "__main__":</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; myproblem =
+Problem(&quot;func1d&quot;, 1, 2, 
+mybounds, myeval, myconstraint)<BR>&nbsp;&nbsp;&nbsp; so = SimpleOpt(myproblem, 
+100000, 0.001, 5, 0, 0)<BR>&nbsp;&nbsp;&nbsp; so.optsearch()</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><BR>Let's explain a little bit more the executable part of the above 
+program.</P>
+<P>By calling the class <FONT face="Courier New" size=2>Problem</FONT>, defined 
+in the <B>problem.py</B> module, the variable <FONT face="Courier New" 
+size=2>myproblem</FONT> gets an instance of the current optimization problem, 
+defined by: the dimension of the input space (<FONT face="Courier New" 
+size=2>1</FONT>), the number of constraints (<FONT face="Courier New" 
+size=2>2</FONT>), the list of bounds (<FONT face="Courier New" 
+size=2>mybounds</FONT>), the objective function (<FONT face="Courier New" 
+size=2>myeval</FONT>), and the set of constraints (<FONT face="Courier New" 
+size=2>myconstraint</FONT>).</P>
+<P>By calling the <FONT face="Courier New" size=2>SimpleOpt</FONT> class, 
+defined in the <B>simpleopt.py</B> module, the variable <FONT face="Courier New" 
+size=2>so</FONT> gets an instance of the optimizer ready to be applied to our 
+problem (<FONT face="Courier New" size=2>myproblem</FONT>), and using a maximum 
+number of steps / iterations for the search process (<FONT face="Courier New" 
+size=2>100000</FONT>), a minimum search step size (<FONT face="Courier New" 
+size=2>0.001</FONT>), and the option of non-plotting any graphs (<FONT 
+face="Courier New" size=2>0</FONT>).</P>
+<P>The <FONT face="Courier New" size=2>SimpleOpt</FONT>'s class method <FONT 
+face="Courier New" size=2>optsearch</FONT> starts the searching process for a 
+local maximum.</P>
+<P>If the search process succeeds, the maximum value of the objective function, 
+and the point in which it was found, are displayed.</P>
+<P><B><BR>REMARK:</B></P>
+<P>Each run of the <FONT face="Courier New" size=2>optsearch</FONT> method 
+eventually finds a single local maximum. In order to find all of them, the 
+process should be re-run a number of times. Obviously, this number depends on 
+the topology of the (hyper-)surface representing the graph of the objective 
+function over the problem space. As it is now, the algorithm doesn't guarantee 
+that for each new run, a different maximum will be found. This implies that even 
+if you found the same maximum for a number of successive trials, this doesn't 
+mean that there are no other maxima to be still found. To be somehow sure that 
+(almost) all the maxima have been found, several trials could be necessary for 
+certain objective functions.</P>
+<P>&nbsp;</P>
+<P>In order to run yourself the above Python code, you 
+can:<BR>&nbsp;&nbsp;&nbsp; - either copy and paste the script from this page in 
+a file (e.g. <B>func1d.py</B>),<BR>&nbsp;&nbsp;&nbsp; - or, download the 
+<B>func1d.py</B> script directly from <a href="func1d.py">here</a>,<BR>and then use the 
+command:</P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; python 
+func1d.py</FONT></P>
+<P>Obviously, you should also have the optimizer modules already on your 
+computer. If not, you can download them now (<a href="simpleopt.py">simpleopt.py</a>,
+<a href="problem.py">problem.py</a>).</P>
+<P><BR><B>REMARK:</B></P>
+<P>When running the above program, if the <B>numeric.py</B> and 
+<B>gnuplot.py</B> modules, and the <B>Gnuplot</B> utility for your operating 
+system, are installed on your computer, the <FONT face="Courier New" 
+size=2>optsearch</FONT> method also provides a graph representing the evolution 
+of the objective function during the search of a local maximum. Such graphs are 
+represented in Figure 2.2, and 2.3 (and also further in section 4). In each of 
+them, "best solution" at iteration k, means the value of the function for the 
+point considered at step k. The graph always represents an increasing curve. 
+This happens because the search algorithm tries to find points for which the 
+value of the objective function is greater than for the current one, at each 
+step / iteration. The curve depends on the starting search point, and ends 
+either when a real local maximum is found, or the allowed number of steps / 
+iterations is reached, or the domain limit is overridden.</P>
+<P>&nbsp;</P>
+<P align=center><IMG border=0 height=431 src="graph01.gif" 
+width=619></P>
+<P align=center>Figure 2.2</P>
+<P align=center>&nbsp;</P>
+<P align=center><IMG border=0 height=433 src="graph02.gif" 
+width=623></P>
+<P align=center>Figure 2.3</P>
+<P align=center>&nbsp;</P>
+<P>The graphs in Figures 2.2 and 2.3, are obtained for two different runs of the 
+program. The first describes a 800 steps process, through which a boundary 
+maximum of value 0 is found in 2pi. The second one, 
+shows a 2250 iterations process, which found the real maximum of the sine 
+function in pi/2.</P>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+<P>&nbsp;</P>
+
+<P><FONT size=4><B><BR><A 
+name="3. The general framework for using the optimizer on custom defined problems">3. 
+The general framework for using the optimizer on user defined 
+problems</A></B></FONT></P>
+
+<P><BR>Having in mind the above simple example (section 2), we can try to define 
+now a general framework for using the optimizer on user defined problems. Such a 
+framework should contain the following&nbsp;parts:</P>
+<UL>
+  <LI>an "import" part, specifying:<BR>&nbsp;&nbsp;&nbsp;&nbsp; - the required 
+  classes from the optimizer related modules 
+  (mandatory)<BR>&nbsp;&nbsp;&nbsp;&nbsp; - the class(es) and methods from other 
+  modules, according to application needs (optional) 
+  <LI>a definition part, including:<BR>&nbsp;&nbsp;&nbsp;&nbsp; - data 
+  structures and functions necessary for the definition of the objective 
+  function and constraint(s)<BR>&nbsp;&nbsp;&nbsp;&nbsp; - specification of the 
+  problem space: list of bounds on each coordinate, as a tuple (x<SUB>min</SUB>, 
+  x<SUB>max</SUB>)<BR>&nbsp;&nbsp;&nbsp;&nbsp; - the procedure definition for 
+  the objective function<BR>&nbsp;&nbsp;&nbsp;&nbsp; - the procedure definition 
+  for the constraint(s) 
+  <LI>the executable part, containing:<BR>&nbsp;&nbsp;&nbsp;&nbsp; - the 
+  specification of the optimization problem<BR>&nbsp;&nbsp;&nbsp;&nbsp; - the 
+  instantiation of the optimizer class for the specified 
+  problem<BR>&nbsp;&nbsp;&nbsp;&nbsp; - the start of one optimization process. 
+  </LI></UL>
+<P>The Python-like code implementing these ideas is shown bellow. Please note, 
+that it doesn't really represent a directly executable script as it is. The 
+portions written between '&lt;' and '&gt;' characters should be replaced by the 
+appropriate Python data / function(s), to customize the code according to your 
+application.</P>
+<P><BR><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Mandatory imports:<BR>#&nbsp;&nbsp;&nbsp;&nbsp; - problem definition 
+class<BR>#&nbsp;&nbsp;&nbsp;&nbsp; - simple, general-purpose optimizer 
+class<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>from problem import Problem<BR>from simpleopt 
+import SimpleOpt</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Auxiliary imports<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>import math<BR>import 
+Numeric&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # needed only for 
+plotting purposes<BR>import 
+Gnuplot&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # needed only for 
+plotting purposes</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Auxiliary data and function definitions<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Specification of the problem space:<BR># list of bounds on each coordinate, as a 
+tuple (xmin, xmax)<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>mybounds = &lt; list_of_binary_tuples 
+&gt;</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Procedural definition of the objective function f<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>def myeval(x):<BR>&nbsp;&nbsp;&nbsp; &lt; 
+objective_function_statements &gt;</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Procedural definition of the set of constraints gi<BR># 
+-------------------------------------------------------------------<BR># NOTE: 
+Each i personalizes a constraint function gi. For a given i<BR># (that is, a 
+given constraint, myconstraint(i, x) must return a<BR># value &lt; 0 if the 
+constraint is satisfied, and &gt; 0 if not<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>def myconstraint(i, x):<BR>&nbsp;&nbsp;&nbsp; 
+if i == 0:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # constraint nr. 
+1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; constraint_1_statements 
+&gt;<BR>&nbsp;&nbsp;&nbsp; elif i == 1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # 
+constraint nr. 2<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; 
+constraint_2_statements &gt;<BR>&nbsp;&nbsp;&nbsp; elif i == 
+2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # constraint nr. 
+3<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; constraint_3_statements 
+&gt;<BR><BR>&nbsp;&nbsp;&nbsp; ...<BR><BR>&nbsp;&nbsp;&nbsp; else: return 
+1&nbsp;&nbsp;&nbsp;&nbsp; # any other constraint...</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># Program 
+starting point<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>if __name__ == "__main__":</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; # Here can be drawn a 
+graph of the objective function</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; &lt; 
+appropriate_statements &gt;</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; # Specify your 
+optimization problem here, getting an instance of<BR>&nbsp;&nbsp;&nbsp; # it. 
+Parameters:<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - problem name<br>
+&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - dimension of the 
+input space<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - number of 
+constraints<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - list of 
+bounds<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - objective 
+function<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - constraints 
+function<br>
+&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - desired starting point reference
+(optional list of coordinates)</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; myproblem = Problem(&lt;
+problem_name &gt;,<br>
+</FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<FONT face="Courier New" size=2>&lt; 
+dimension_of_problem_space 
+&gt;,<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt; number_of_constraints 
+&gt;,<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+mybounds,<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+myeval,<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+myconstraint,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+seedpoint = &lt; value &gt;)</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; # Create a personalized 
+instance of the optimizer, by specifying:<BR>&nbsp;&nbsp;&nbsp; 
+#&nbsp;&nbsp;&nbsp;&nbsp; - the problem<BR>&nbsp;&nbsp;&nbsp; 
+#&nbsp;&nbsp;&nbsp;&nbsp; - maximum number of steps / iterations for the search 
+process<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - minimum search step 
+size (the search process resolution)<BR>&nbsp;&nbsp;&nbsp;
+#&nbsp;&nbsp;&nbsp;&nbsp; - maximum search depth (1 - 500)<br>
+&nbsp;&nbsp;&nbsp; 
+#&nbsp;&nbsp;&nbsp;&nbsp; - whether to use backtracking (1), or not 
+(0)<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - whether to use graphics 
+(1), or not (0)</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; so = 
+SimpleOpt(myproblem,<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt; number_of_steps 
+&gt;,<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt; minimum_search_step_size 
+&gt;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt; maximum_search_depth &gt;,<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt; option_to_use_or_not_backtracking 
+&gt;,<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt; option_to_plot_or_not_graphs &gt;)</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; # Start the 
+optimizer</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; so.optsearch()</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><BR><B>REMARKS:</B></P>
+<P>Please note that the parameters of the <FONT face="Courier New" 
+size=2>simpleopt</FONT> method, referred above as <FONT face="Courier New" 
+size=2>number_of_steps</FONT> and <FONT face="Courier New" 
+size=2>minimum_step_size,</FONT> must be chosen according to the concrete 
+problem. They should also be correlated to each other (lesser <FONT 
+face="Courier New" size=2>minimum_step_size</FONT> requires greater <FONT 
+face="Courier New" size=2>number_of_steps</FONT>).&nbsp;<br>
+<br>
+The <FONT face="Courier New" size=2>maximum_search_depth</FONT> parameter could be
+considered as a measure of the &quot;stubbornness&quot; with which the algorithm
+tries to find a possible new optimum around the current candidate. Smaller
+values should be used for problems having relatively smooth objective function,
+while larger ones are indicated for problems with &quot;spiky&quot; objective
+function (including the linear programming type ones).<br>
+<br>
+The <font face="Courier New" size="2">problem_name</font> parameter is used only
+for identifying a log file (with the extension .log) which is generated while
+running the problem associated SimpleOpt instance, and storing most of the
+information displayed on the screen during this process.&nbsp;</P>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+<P>&nbsp;</P>
+
+<P><FONT size=4><B><BR><A 
+name="4. An example of using the general framework for a 2-D function">4. An 
+example of using the general framework for a 2-D function</A></B></FONT></P>
+<P><BR>Based on the framework described in section 3, we present a&nbsp; more 
+complex example, of a 2-D objective function optimization. We consider a real 
+function F, defined on the square [0, 8] × [0, 8], in the form of a sum of 
+exponentials:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+k<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; F(X) = Sum f<SUB>i</SUB>(X)<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+i=1<BR><BR>where,<BR><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+d(P<SUB>i</SUB>, X)<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+f<SUB>i</SUB>(X) = b<SUB>i</SUB> exp( -&nbsp;
+------------- )).<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a<SUB>i</SUB><BR></P>
+<P>Each exponential f<SUB>i</SUB> is centered on a point P<SUB>i</SUB>, has an 
+amplitude b<SUB>i</SUB>, and a "form factor" given by 
+the parameter a<SUB>i</SUB>. It depends on the current 
+point X = (x<SUB>0</SUB>, x<SUB>1</SUB>), by means of the Euclidean distance d, 
+between the center P<SUB>i</SUB> and X. Each exponential f<SUB>i</SUB> 
+determines a maximum of the objective function F in each point P<SUB>i</SUB>. 
+For the example presented here, we defined a function F, composed of 7 
+exponentials f<SUB>i</SUB>, and thus having 7 maxima. All exponentials have the 
+same amplitude (b<SUB>i</SUB> = 1) and "form factor" 
+(a<SUB>i</SUB> = 2)</P>
+<P>A graph of the above described objective function is depicted in Figure 
+4.1.</P>
+<P>&nbsp;</P>
+<P align=center><IMG border=0 height=405 src="humps.gif" 
+width=593></P>
+<P align=center>Figure 4.1</P>
+<P align=center>&nbsp;</P>
+<P>Let's consider that the optimization problem we want to solve is subject to a 
+single constraint, representing a circular domain of radius 3, centered in [4, 
+4].</P>
+<P>The Python code which attempts to solve this problem is shown bellow.</P>
+<P><FONT face="Courier New" size=2><BR># 
+-------------------------------------------------------------------<BR># 
+Mandatory imports:<BR>#&nbsp;&nbsp;&nbsp;&nbsp; - problem definition 
+class<BR>#&nbsp;&nbsp;&nbsp;&nbsp; - simple, general-purpose optimizer 
+class<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>from problem import Problem<BR>from simpleopt 
+import SimpleOpt</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Auxiliary imports<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>import math<BR>#import Numeric # needed for 
+plotting purposes<BR>#import Gnuplot # needed for plotting purposes</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Auxiliary data and function definitions<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>p = [(1, 6), (0, 3), (2, 1), (3, 3), (5, 5), 
+(6, 4), (6, 2)]<BR>alfa = [2, 2, 2, 2, 2, 2, 2]<BR>beta = [1, 1, 1, 1, 1, 1, 
+1]<BR>center = (4, 4)<BR>radius = 3</FONT></P>
+<P><FONT face="Courier New" size=2>def dist(x, y):<BR>&nbsp;&nbsp;&nbsp; return 
+math.sqrt((x[0] - y[0])*(x[0] - y[0]) 
++<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+(x[1] - y[1])*(x[1] - y[1]))</FONT></P>
+<P><FONT face="Courier New" size=2>def hump(i, x):<BR>&nbsp;&nbsp;&nbsp; return 
+beta[i] * math.exp(-dist(p[i], x) / alfa[i])</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Specification of the problem space:<BR># list of bounds on each coordinate, in 
+the form (xmin, xmax)<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>mybounds = [(0, 8), (0, 8)]</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Procedural definition of the objective function f<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>def myeval(x):<BR>&nbsp;&nbsp;&nbsp; sum = 
+0<BR>&nbsp;&nbsp;&nbsp; for i in range(len(p)): sum += hump(i, 
+x)<BR>&nbsp;&nbsp;&nbsp; return sum</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+Procedural definition of the set of constraints gi<BR># 
+-------------------------------------------------------------------<BR># NOTE: 
+Each i personalizes a constraint function gi. For a given i<BR># (that is, a 
+given constraint, myconstraint(i, x) must return a <BR># value &lt;= 0 if the 
+constraint is satisfied, and &gt; 0 if not<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>def myconstraint(i, x):<BR>&nbsp;&nbsp;&nbsp; 
+if i == 0:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # 
+constraint nr. 1<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return dist(x, 
+center) - radius<BR>&nbsp;&nbsp;&nbsp; 
+else:<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # any other 
+constraint...</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># Program 
+starting point<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><FONT face="Courier New" size=2>if __name__ == "__main__":</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; # Here can be drawn a 
+graph of the objective function<BR>&nbsp;&nbsp;&nbsp; # &lt; ... (insert 
+appropriate code) ... &gt;</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; # Specify your 
+optimization problem here, getting an instance of<BR>&nbsp;&nbsp;&nbsp; # it. 
+Parameters:<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - problem name<br>
+&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - dimension of the 
+input space<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - number of 
+constraints<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - list of 
+bounds<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - objective 
+function<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - constraints 
+function<br>
+&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - desired starting point reference
+(optional list of coordinates)</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; myproblem =
+Problem(&quot;func2d&quot;, 2, 1, 
+mybounds, myeval, myconstraint)</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; # Create a personalized 
+instance of the optimizer, by specifying:<BR>&nbsp;&nbsp;&nbsp; 
+#&nbsp;&nbsp;&nbsp;&nbsp; - the problem<BR>&nbsp;&nbsp;&nbsp; 
+#&nbsp;&nbsp;&nbsp;&nbsp; - maximum number of steps for the search 
+process<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - minimum search step 
+size (the search process resolution)<BR>&nbsp;&nbsp;&nbsp;
+#&nbsp;&nbsp;&nbsp;&nbsp; - maximum search depth (1 - 500)<br>
+&nbsp;&nbsp;&nbsp; 
+#&nbsp;&nbsp;&nbsp;&nbsp; - whether to use backtracking (1), or not 
+(0)<BR>&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp; - whether to use graphics 
+(1), or not (0)</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; so = SimpleOpt(myproblem, 
+100000, 0.001, 5, 0, 0)</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; # Start the 
+optimizer</FONT></P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; so.optsearch()</FONT></P>
+<P><FONT face="Courier New" size=2># 
+-------------------------------------------------------------------<BR># 
+-------------------------------------------------------------------</FONT></P>
+<P><BR>In order to run yourself the above Python code, you 
+can:<BR>&nbsp;&nbsp;&nbsp; - either copy and paste the script from this page in 
+a file (e.g. <B>func2d.py</B>),<BR>&nbsp;&nbsp;&nbsp; - or, download the 
+<B>func2d.py</B> script directly from <a href="func2d.py">here</a>,<BR>and then use the 
+command:</P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; python 
+func2d.py</FONT></P>
+<P>Obviously, you should also have the optimizer modules already on your 
+computer. If not, you can download them now (<a href="simpleopt.py">simpleopt.py</a>,
+<a href="problem.py">problem.py</a>).</P>
+<P>Please remember that on one run, only one maximum is found. To find all of 
+them, several trials should be considered.</P>
+<P>Figures 4.2 and 4.3 present the evolution of the searching process at each 
+step, for two different runs.</P>
+<P>&nbsp;</P>
+<P align=center><IMG border=0 height=433 src="graph1.gif" 
+width=626></P>
+<P align=center>Figure 4.2</P>
+<P align=center>&nbsp;</P>
+<P></P>
+<P align=center><IMG border=0 height=435 src="graph2.gif" 
+width=623></P>
+<P align=center>Figure 4.3</P>
+<P align=center>&nbsp;</P>
+<P><B>REMARK:</B></P>
+<P>The above example could be considered as a good test environment for the 
+optimizer capabilities. The function F could be dramatically modified, by 
+appropriately choosing the number of points P<SUB>i</SUB>, the amplitudes b<SUB>i</SUB>, the "form factors"
+a<SUB>i</SUB>, and by defining different constraint regions. 
+Perhaps, a good starting point for tests could be to change the radius of the 
+constraint region, and / or the amplitudes of the exponentials.</P>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+<P>&nbsp;</P>
+
+<P><BR><FONT size=4><B><A name="5. Conclusions">5. Conclusions</A></B></FONT></P>
+
+<P>A simple, general purpose optimization tool has been designed and developed 
+under the Python language. This document described some practical ways of using 
+this tool from within other Python applications. A simple 1-D example, of a sine 
+objective function optimization program was presented and commented first. 
+Starting from this easy to understand example, a general structure for Python 
+applications which use the optimizer has been sketched then. Finally, a more 
+complex program example, built on the above general structure, intended to 
+optimize a 2-D objective function was presented. This last example could be the 
+base for a lot of experiments, the proposed objective function being entirely 
+customizable by its parameters. Thus, the strengths and limitations of the 
+optimizer can be revealed. Using the general framework presented in section 3, 
+one can even experiment the behavior of&nbsp; the optimizer on various real 
+world problems.</P>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+<P> </P>
+
+<P><B><A name=DOWNLOADS:>DOWNLOAD:</A></B></P>
+
+<DIV align=left>
+<TABLE border=1 height=26 width=873>
+  <TBODY>
+  <TR>
+    <TD align=middle height=35 width=227><a href="simpleopt.py"><B>simpleopt.py</B></a></TD>
+    <TD align=middle height=35 width=1472>
+      <P align=left>&nbsp;the Python code for the optimizer</P></TD></TR>
+  <TR>
+    <TD align=middle height=35 width=227><a href="problem.py"><B>problem.py</B></a></TD>
+    <TD align=middle height=35 width=1472>
+      <P align=left>&nbsp;the Python code for the problem 
+specification</P></TD></TR>
+  <TR>
+    <TD align=middle height=35 width=227><a href="func1d.py"><B>func1d.py</B></a></TD>
+    <TD align=middle height=35 width=1472>
+      <P align=left>&nbsp;the Python code to call the optimizer for a sine 
+      function (1-D example)</P></TD></TR>
+  <TR>
+    <TD align=middle height=34 width=227><a href="func2d.py"><B>func2d.py</B></a></TD>
+    <TD align=middle height=34 width=1472>
+      <P align=left>&nbsp;the Python code to call the optimizer for a sum of 
+      exponentials function (2-D example)</P></TD></TR>
+  <TR>
+    <TD align=middle height=34 width=227><B><a href="simpleopt.zip">simpleopt.zip</a></B></TD>
+    <TD align=middle height=34 width=1472>
+      <P align=left>&nbsp;the "zip" archive containing all the SimpleOpt Python 
+      modules (including all examples)</P></TD></TR></TBODY></TABLE></DIV>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+
+<P align=center>&lt; <a href="index.html">Go to SimpleOpt main page</a> &gt;</P>
+
+</BODY>
+
+</HTML>

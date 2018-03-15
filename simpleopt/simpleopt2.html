@@ -1,0 +1,382 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+
+<HEAD>
+   <META http-equiv=Content-Language content=en-us>
+   <META http-equiv=Content-Type content="text/html; charset=windows-1252">
+   <META name="Classification" content="SimpleOpt, general purpose optimizer, optimization problem, Python">
+   <META name="Description" content="SimpleOpt, general purpose optimizer, optimization problem, Python">
+   <META name="GENERATOR" content="Notepad">
+   <META name="Keywords" content="SimpleOpt, general purpose optimizer, optimization problem, Python">
+   <TITLE>A General Purpose Optimization Tool (2)</TITLE>
+</HEAD>
+
+<BODY>
+
+<P align=center><FONT color=#008000>[Last updated on: Thursday, March 04, 
+2009]</FONT></P>
+<p align=center>&nbsp;</p>
+
+<P align=center>&lt; <a href="index.html">Go to SimpleOpt main page</a> &gt;</P>
+<p align=center>&nbsp;</p>
+
+<P align=center><font size="5"><b>The SimpleOpt algorithm.<br>
+Its application for solving expected utility optimization problems</b></font></P>
+<P align=center>&nbsp;<br>
+
+<FONT face="Times New Roman">
+Copyright &copy; 2003, by Dan Mugurel Ontanu &amp; Mihnea Horia Vrejoiu
+</FONT>
+<br>&nbsp;<br>&nbsp;<br></P>
+
+<P 
+align=left><B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<A name=Contents:>Contents:</A></B></P>
+
+<P 
+align=left>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+1. <a href="#1. Introduction">Introduction</a><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+2. <a href="#2. A simple example">A 
+simple 
+example</a><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3. <a href="#3. Conclusions">Conclusions</a><BR><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="#DOWNLOADS:"><FONT 
+size=2>DOWNLOAD</FONT></a></P>
+<P align=center>&nbsp;</P>
+
+<BLOCKQUOTE>
+  <BLOCKQUOTE>
+    <P><B><BR>ABSTRACT</B></P>
+    <P><FONT size=3>A simple, general purpose optimization tool (SimpleOpt) has been 
+    designed and developed under the Python language. If you are not (yet)
+    familiar with SimpleOpt, please see also &quot;</FONT><a href="simpleopt1.html">The
+SimpleOpt algorithm. Its application to general purpose optimization problems</a><FONT size=3>&quot;. The purpose of this 
+    document is to describe how the SimpleOpt algorithm can be applied to solve
+    expected utility optimization problems. It only deals with the static case.
+    For the dynamic one, please refer to &quot;<a href="simpleopt3.html">Solving
+    expected utility optimization problems - the dynamic case</a>&quot;.
+    The introduction (section 1) presents a brief overview 
+    of the expected utility optimization problems. For making things 
+    as attractive and easy understandable as possible, a simple example for a
+    2-D utility function is provided (in section 
+    2). This example shows how a new type of problem (in our case, the
+    optimization of expected utility) can be inserted as a
+    plug-in in SimpleOpt. This means that for a new category of optimization
+    problems, one should only procedurally define the appropriate problem class,
+    and then, just use SimpleOpt on it. We expect that such a
+    &quot;plug-in&quot; mechanism can be used as well on other categories of
+    optimization problems, up to a reasonable extent.</FONT> <FONT size=3>This document ends with some conclusions (section
+    3), and a list of available downloads.</FONT></P>
+  </BLOCKQUOTE>
+</BLOCKQUOTE>
+<P>&nbsp;</P>
+
+<P><B><FONT size=4><BR><A name="1. Introduction">1. Introduction</A></FONT></B></P>
+
+<P><B><FONT size=4><BR></FONT></B>An expected utility optimization problem could
+be briefly described as in the following:</P>
+<P>Let u be an &quot;utility&quot; function</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; u : S --&gt; <B>R</B>,&nbsp;&nbsp;
+where S is a
+subset of <B>R</B><SUP>n</SUP>.</P>
+<P>For practical purposes, we may take S as a n-dimensional interval (a "hyper box"):</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S = [x<SUB>0 min</SUB>, x<SUB>0 
+max</SUB>] × … × [x<SUB>i min</SUB>, x<SUB>i max</SUB>] × … × [x<SUB>n-1 
+min</SUB>, x<SUB>n-1 max</SUB>],</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; with x<SUB>i min</SUB>, x<SUB>i 
+max</SUB> in <B>R</B>.</P>
+<P>On the same subset S, let's consider a family of probability density
+functions (pdf), whose members are individualized by a parameter (a) called
+&quot;action&quot;.&nbsp;</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pdf : S × A --&gt; [0, 1],&nbsp;&nbsp; where A = set of possible &quot;actions&quot;,</P>
+<P>with the property that:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font size="6">S</font> pdf (x
+| a) dx&nbsp; = 1.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S</P>
+<P>For instance, if we consider S to be a set of &quot;events&quot;, then u(x)
+represents the utility of the &quot;event&quot; x, while pdf(x | a) represents
+the probability of the &quot;event&quot; x, given the &quot;action&quot; a.</P>
+<P>The optimization problem in this case, could be expressed as searching for an
+&quot;action&quot; a, which maximizes the integral:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font size="6">S</font> u(x) pdf(x | a)
+dx,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S</P>
+<P>over the set of &quot;actions&quot; A, given the constraints:&nbsp;</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; G<SUB>j</SUB>(a) &lt;= 0,&nbsp;&nbsp; j = 0 … m-1,&nbsp;&nbsp; with a
+in A.</P>
+<P>The above integral represents the expected utility, given an
+&quot;action&quot; a. The above described problem could thus be seen as the
+optimization of a correlation function over a given space of
+&quot;actions&quot;, each of them being subject of a number of given
+constraints.</P>
+<P>The following picture shows the framework of the problem, for the 1-dimensional
+case.</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<P align="center"><img border="0" src="eu_fig1.gif" width="773" height="370"></P>
+<P align=right>&nbsp;</P>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+<P>&nbsp;</P>
+
+<P><BR><B><FONT size=4><A name="2. A simple example">2. A simple example</A></FONT></B></P>
+<P>&nbsp;</P>
+
+<P>Let's consider an utility function defined as a sum of &quot;humps&quot; (as
+described in section 4 of &quot;<a href="simpleopt1.html#4. An example of using the general framework for a 2-D function">The
+SimpleOpt algorithm. Its application to general purpose optimization problems</a>&quot;),
+and a probability density function (pdf) in the form of a bi-dimensional
+Gaussian, defined on the same space as the utility function. For this example,
+we chose a simple &quot;action&quot; model, one such &quot;action&quot; being represented by the center
+of the Gaussian function. Therefore, the &quot;actions&quot; set (A) can be
+considered to coincide with the utility function space, and the constraints
+defined on the &quot;actions&quot; are in fact constraints over the domain of
+the utility function. This way, an &quot;action&quot;, which is a pair of
+co-ordinates, personalizes the pdf, by giving its location within the utility
+space. The application of SimpleOpt on such a problem, leads to finding a point
+(that is, an &quot;action&quot;) for which the local resemblance of the utility
+function with the corresponding pdf is maximum. From the SimpleOpt point of view,
+the problem space is the set of &quot;actions&quot; A, bounded by the given
+constraints G, and the objective function is the integral representing the
+expected utility (regarded as a function of &quot;action&quot;). SimpleOpt is
+searching for an &quot;action&quot; a, for which this integral has a maximum
+value.</P>
+<P>The Python script which implements the above example, is presented bellow.</P>
+<P>&nbsp;</P>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------<br>
+# Mandatory imports:<br>
+#&nbsp;&nbsp;&nbsp; - problem definition class<br>
+#&nbsp;&nbsp;&nbsp; - simple, general-purpose optimizer class<br>
+# -------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2">from problem import *<br>
+from simpleopt import SimpleOpt</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------<br>
+# Auxiliary imports<br>
+# -------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2">import math<br>
+#import Numeric&nbsp;&nbsp; # needed for plotting purposes<br>
+#import Gnuplot&nbsp;&nbsp; # needed for plotting purposes</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------<br>
+# Auxiliary data and function definitions<br>
+# -------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2"># For the &quot;humps&quot;</font></p>
+<p><font face="Courier New" size="2">p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = [(1, 6),
+(0, 3), (2, 1), (3, 3), (5, 5), (6, 4), (6, 2)]<br>
+alfa&nbsp;&nbsp; = [2, 2, 2, 2, 2, 2, 2]<br>
+beta&nbsp;&nbsp; = [1, 1, 1, 1, 1, 1, 1]</font></p>
+<p><font face="Courier New" size="2"># For the &quot;action&quot; constraints</font></p>
+<p><font face="Courier New" size="2">center = (6, 6)<br>
+radius = 3</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2">def dist(x, y):<br>
+&nbsp;&nbsp; return math.sqrt((x[0] - y[0])*(x[0] - y[0]) +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(x[1] - y[1])*(x[1] - y[1]))</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2">def hump(i, x):<br>
+&nbsp;&nbsp; return beta[i] * math.exp(-dist(p[i], x) / alfa[i])</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------<br>
+# Domain of definition for the utility function:<br>
+# a list of bounds on each coordinate, in the form (xmin, xmax)<br>
+# -------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2">my_u_bounds = [(0, 8), (0, 8)]</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------<br>
+# Procedural definition of the utility function u(x)<br>
+# -------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2">def myutility(x):<br>
+&nbsp;&nbsp; sum = 0<br>
+&nbsp;&nbsp; for i in range(len(p)): sum += hump(i, x)<br>
+&nbsp;&nbsp; return sum</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------<br>
+# Specification of the &quot;action&quot; space:<br>
+# a hyperbox, defined as a list of bounds on each coordinate, in the&nbsp;<br>
+# form (xmin, xmax)<br>
+# -------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2">my_a_bounds = [(0, 8), (0, 8)]&nbsp;&nbsp;
+# the same as the u(x) domain<br>
+<br>
+# -------------------------------------------------------------------<br>
+# Procedural definition of the set of constraints gi for the<br>
+# &quot;actions&quot; space<br>
+# -------------------------------------------------------------------<br>
+# NOTE: Each i personalizes a constraint function gi. For a given i<br>
+# (that is, a given constraint, myconstraint(i, x) must return a<br>
+# value &lt;= 0 if the constraint is satisfied, and &gt; 0 if not<br>
+# -------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2"># Two disconnected constraint regions</font></p>
+<p><font face="Courier New" size="2">def myconstraint(i, a):<br>
+&nbsp;&nbsp; if i == 0: return dist(a, center) - radius&nbsp;&nbsp; # circular<br>
+&nbsp;&nbsp; if i == 1: return a[0] + a[1] -
+11.8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # linear<br>
+&nbsp;&nbsp; return 1&nbsp;&nbsp; # no other index allowed</font></p>
+<p><font face="Courier New" size="2"># One constraint region, problem space made
+of 2 disconnected regions</font></p>
+<p><font face="Courier New" size="2">#def myconstraint(i, a):<br>
+#&nbsp;&nbsp; if i == 0:<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if dist(a, center) - radius &lt; 0 and a[0] +
+a[1] - 11.8 &lt; 0:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 1<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else: return -1<br>
+#&nbsp;&nbsp; return 1</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------<br>
+# Procedural definition of the probability distribution function<br>
+# PDF(x, a)<br>
+# -------------------------------------------------------------------<br>
+# It should be defined over the utility function domain, and<br>
+# personalized by a given &quot;action&quot;<br>
+# -------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2">def myPDF(x, a):<br>
+&nbsp;&nbsp; # A unitary hump, centered at a given &quot;action&quot; a<br>
+&nbsp;&nbsp; d = dist(x, a)<br>
+&nbsp;&nbsp; return math.exp(-(d*d / 0.01))</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------<br>
+# Program starting point<br>
+# -------------------------------------------------------------------</font></p>
+<p><font face="Courier New" size="2">if __name__ == &quot;__main__&quot;:</font></p>
+<p><font face="Courier New" size="2">   &nbsp;&nbsp; # Specify your optimization
+problem here, getting an instance of it.<br>
+&nbsp;&nbsp; # Parameters:<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - problem name<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - dimension of the input space<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - number of constraints<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - list of bounds<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - objective function<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - constraints function<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - desired starting point reference (optional
+list of coordinates)</font></p>
+<p><font face="Courier New" size="2">   &nbsp;&nbsp; myproblem = EU_Problem(&quot;eu_func2d&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+my_a_bounds,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+my_u_bounds,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+myutility,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+myPDF,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+myconstraint)</font></p>
+<p><font face="Courier New" size="2">   &nbsp;&nbsp; # Create a personalized
+instance of the optimizer, by specifying:<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - the problem<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - maximum number of steps for the search
+process<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - maximum search depth (1 - 500)<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - minimum search step size (the search process
+resolution)<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - whether to use backtracking (1), or not (0)<br>
+&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp; - whether to use graphics (1), or not (0)</font></p>
+<p><font face="Courier New" size="2">   so = SimpleOpt(myproblem, 100000, 0.1, 5, 0, 0)</font></p>
+<p><font face="Courier New" size="2">   # Start the optimizer</font></p>
+<p><font face="Courier New" size="2">   so.optsearch()</font></p>
+<p><font face="Courier New" size="2">#
+-------------------------------------------------------------------<br>
+# -------------------------------------------------------------------</font></p>
+<P>&nbsp;</P>
+<P><b>REMARKS:</b></P>
+<P>Please note that, in the above script, in order to define the optimization
+problem, the EU_Problem class was called instead of the Problem one. In this
+case, the objective function has not to be explicitly specified anymore, being
+defined as an internal attribute of the EU_Problem class.&nbsp;&nbsp;</P>
+<P>You can also observe that for the example problem proposed, the constraint is given in two ways,
+one of them being commented off. A graphical representation of the un-commented constraint is
+presented in the following figure (the commented one being represented by a
+complementary image).<br>
+</P>
+<P>&nbsp;</P>
+<P align="center"><img border="0" src="eu_fig2.gif" width="796" height="555"></P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+<P>In order to run yourself the Python code presented in this section, you 
+can:<BR>&nbsp;&nbsp;&nbsp; - either copy and paste the script from this page in 
+a file (e.g. <b>eu_func2d.py</b>),<BR>&nbsp;&nbsp;&nbsp; - or, download the <b>eu_func2d.py</b> script directly from
+<a href="eu_func2d.py">here</a>,<BR>and then use the 
+command:</P>
+<P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; python eu_func2d.py</FONT></P>
+<P>Obviously, you should also have the optimizer modules already on your 
+computer. If not, you can download them now (<a href="simpleopt.py">simpleopt.py</a>,
+<a href="problem.py">problem.py</a>).</P>
+<P><BR><B>REMARK:</B></P>
+<P>When running the above program, if the <B>numeric.py</B> and 
+<B>gnuplot.py</B> modules, and the <B>Gnuplot</B> utility for your operating 
+system, are installed on your computer, the <FONT face="Courier New" 
+size=2>optsearch</FONT> method also provides a graph representing the evolution 
+of the objective function during the search of a local maximum. The graph always represents an increasing curve. 
+This happens because the search algorithm tries to find points for which the 
+value of the objective function is greater than for the current one, at each 
+step / iteration. The curve depends on the starting search point, and ends 
+either when a real local maximum is found, or the allowed number of steps / 
+iterations is reached, or the domain limit is overridden.</P>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+<P>&nbsp;</P>
+
+<P><BR><FONT size=4><B><a name="3. Conclusions">3. Conclusions</a></B></FONT></P>
+<P>&nbsp;</P>
+
+<P> This document described how the SimpleOpt algorithm can be applied to solve
+    expected utility optimization problems. It only treated the static case. For
+    the dynamic one, please refer to <a href="simpleopt3.html">this page</a>. A
+    brief overview 
+    of the expected utility optimization problems was presented. For making things 
+    as attractive and easy understandable as possible, a simple example for a
+    2-D utility function was also provided. This example showed how a new type of
+    problem can be inserted as a plug-in in SimpleOpt. This means that for a new
+    category of optimization problems, one should only procedurally define the
+    appropriate problem class, and then, just use SimpleOpt on it. We expect
+    that such a &quot;plug-in&quot; mechanism can be used as well on other
+    category of optimization problems, up to a reasonable extent.</P>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+<P> </P>
+
+<P><B><A name=DOWNLOADS:>DOWNLOAD:</A></B></P>
+
+<DIV align=left>
+<TABLE border=1 height=26 width=873>
+  <TBODY>
+  <TR>
+    <TD align=middle height=35 width=227><a href="simpleopt.py"><B>simpleopt.py</B></a></TD>
+    <TD align=middle height=35 width=1472>
+      <P align=left>&nbsp;the Python code for the optimizer</P></TD></TR>
+  <TR>
+    <TD align=middle height=35 width=227><a href="problem.py"><B>problem.py</B></a></TD>
+    <TD align=middle height=35 width=1472>
+      <P align=left>&nbsp;the Python code for the problem 
+specification</P></TD></TR>
+  <TR>
+    <TD align=middle height=34 width=227><a href="eu_func2d.py"><B>eu_func2d.py</B></a></TD>
+    <TD align=middle height=34 width=1472>
+      <P align=left>&nbsp;Python example code to call SimpleOpt for an expected
+      utility function (2-D example)</P></TD></TR>
+  <TR>
+    <TD align=middle height=34 width=227><B><a href="simpleopt.zip">simpleopt.zip</a></B></TD>
+    <TD align=middle height=34 width=1472>
+      <P align=left>&nbsp;the &quot;zip&quot; archive containing all the
+      SimpleOpt Python modules (including all examples)</P></TD></TR></TBODY></TABLE></DIV>
+
+<P align=right><FONT face="Arial Narrow"><a href="#Contents:">(Go to 
+Contents...)</a></FONT></P>
+
+<P align=center>&lt; <a href="index.html">Go to SimpleOpt main page</a> &gt;</P>
+
+</BODY>
+
+</HTML>
