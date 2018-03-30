@@ -14,7 +14,7 @@
 
 <BODY>
 
-<P align=center><FONT color=#008000>[Last updated on: Thursday, March 04, 2009]</FONT></P>
+<P align=center><FONT color=#008000>[Last updated on: Thursday, March 29, 2018]</FONT></P>
 <P align=center>&nbsp;</P>
 <P align=center>&lt; <a href="index.html">Go to SimpleOpt main page</a> &gt;</P>
 <P align=center>&nbsp;</P>
@@ -72,7 +72,8 @@ where S is a
 subset of <B>R</B><SUP>n</SUP>.</P>
 <P>The subset S, is defined as a n-dimensional interval (a "hyper box"):</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S = [x<SUB>0 min</SUB>, x<SUB>0 
-max</SUB>] × ... × [x<SUB>i min</SUB>, x<SUB>i max</SUB>] × ... × [x<SUB>n-1 
+max</SUB>] <font face="Arial" size=-1>x</font> ... <font face="Arial" size=-1>x</font> [x<SUB>i min</SUB>, x<SUB>i max</SUB>]
+<font face="Arial" size=-1>x</font> ... <font face="Arial" size=-1>x</font> [x<SUB>n-1 
 min</SUB>, x<SUB>n-1 max</SUB>],</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; with x<SUB>i min</SUB>, x<SUB>i 
 max</SUB> in <b>R</b>.</P>
@@ -115,7 +116,7 @@ width=631></P>
 <P align=center>&nbsp;</P>
 <P>We want to optimize this function, restraining only to the [0.5, 2pi] interval. This can be expressed by considering the 
 following system of two constraints:</P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; G<SUB>0</SUB>(x) = 0.5 – x &lt; 
+<P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; G<SUB>0</SUB>(x) = 0.5 - x &lt; 
 0,&nbsp;&nbsp; and&nbsp;&nbsp; G<SUB>1</SUB>(x) = x - 2pi &lt; 0.</P>
 <P>How can we express this simple optimization problem, using the Python 
 language?</P>
@@ -130,7 +131,7 @@ size=2>myeval(x)</FONT>, could be defined like this:</P>
 <P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; def myeval(x): return 
 math.sin(x[0]).</FONT></P>
 <P>Please note that the formal parameter x must be a list of coordinates x[0], 
-…, x[i], …, x[n-1]. This is why we used the notation x[0] instead of x, for our 
+..., x[i], ..., x[n-1]. This is why we used the notation x[0] instead of x, for our 
 1-D example.</P>
 <P>The two constraints G<SUB>0</SUB> and G<SUB>1</SUB> could be specified as 
 only one function, <FONT face="Courier New" size=2>myconstraint(i, x)</FONT>, 
@@ -455,7 +456,7 @@ name="4. An example of using the general framework for a 2-D function">4. An
 example of using the general framework for a 2-D function</A></B></FONT></P>
 <P><BR>Based on the framework described in section 3, we present a&nbsp; more 
 complex example, of a 2-D objective function optimization. We consider a real 
-function F, defined on the square [0, 8] × [0, 8], in the form of a sum of 
+function F, defined on the square [0, 8] <font face="Arial" size=-1>x</font> [0, 8], in the form of a sum of 
 exponentials:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 k<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; F(X) = Sum f<SUB>i</SUB>(X)<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
