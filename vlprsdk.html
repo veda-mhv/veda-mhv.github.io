@@ -1,4 +1,3 @@
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <HTML>
 <HEAD>
@@ -14,7 +13,7 @@
 <!--BODY BACKGROUND="recbg.jpg"-->
 <BODY BACKGROUND="recbg.jpg" bgproperties="fixed">
 
-<FONT face="Arial">
+<FONT face="Arial" size="3">
 
 <a name="top"></a>
 
@@ -23,9 +22,9 @@
 <CENTER>
 <dl>
 
-<DT><B><font size="5"><font color="#CC00CC"><i>(Rel. Dec. 2015)</i></font>&nbsp;&nbsp;
-VEDA LPR engine V.2.1 - SDK / API</font></B></DT>
-<DT><B><I><font color="#008080" size="3">(for ANPR/ALPR applications developers)</font></I></B></DT>
+<DT><B><font size="3" color="#CC00CC"><i>(Last update: Mar. 2020)</i></font><br>
+<font size="5">VEDA LPR engine V.2.1 - SDK / API</font></B></DT>
+<DT><B><I><font color="#008080" size="3">for ANPR/ALPR applications developers/intrgrators</font></I></B></DT>
 
 <P>
 <b><font size="3" color="#0000a0">
@@ -53,7 +52,7 @@ A free Demo LPR SDK / API can be downloaded !!! (See below) ***
 
 <H1>
 <BR>
-<B><FONT SIZE=+1 color="#000080">BRIEF GENERAL DESCRIPTION</FONT></B>
+<FONT SIZE="+1" color="#000080">BRIEF GENERAL DESCRIPTION</FONT>
 </H1>
 
 <UL>
@@ -61,7 +60,7 @@ A free Demo LPR SDK / API can be downloaded !!! (See below) ***
 
 The <b>VEDA LPR engine SDK/API</b> is a software library providing License Plate Recognition (LPR) core functions that can be smoothly / seamlessly integrated for development of Automatic Number Plate Recognition (ANPR) based applications.
 <br><br>
-It mainly consists of a <font color="#f00000">Windows / 32-bit DLL</font> (<B><TT><FONT SIZE=+1 color="#008000">lprcore.dll</FONT></TT></B>), offering four (4) API functions, implemented using the <B><TT><FONT SIZE=+1 color="#000080">__stdcall</FONT></TT></B> convention: two for allocating / initializing, and respectively releasing / freeing the LPR i/o data structure, i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_init()</FONT></TT></B> and <B><TT><FONT SIZE=+1 color="#000080">LPR_cleanup()</FONT></TT></B>, a main one, i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_get_number()</FONT></TT></B>, and an auxiliary one, i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_free_number_structures()</FONT></TT></B>, which, for most of the applications, is very likely to be never used. Here are a few more words about each of these functions:
+It mainly consists of a <font color="#D00000">Windows / 32-bit DLL</font> (<B><TT><FONT SIZE=+1 color="#008000">lprcore.dll</FONT></TT></B>), offering four (4) API functions, implemented using the <B><TT><FONT SIZE=+1 color="#000080">__stdcall</FONT></TT></B> convention: two for allocating / initializing, and respectively releasing / freeing the LPR i/o data structure, i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_init()</FONT></TT></B> and <B><TT><FONT SIZE=+1 color="#000080">LPR_cleanup()</FONT></TT></B>, a main one, i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_get_number()</FONT></TT></B>, and an auxiliary one, i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_free_number_structures()</FONT></TT></B>, which, for most of the applications, is very likely to be never used. Here are a few more words about each of these functions:
 <br>
 
 <ul>
@@ -116,7 +115,7 @@ The auxiliary function (i.e. <B><TT><FONT SIZE=+1 color="#000080">LPR_free_numbe
 
 </ul>
 
-A <FONT color="#f00000">Windows / 32-bit C/C++</FONT> header file (i.e. <B><TT><FONT SIZE=+1 color="#008000">lpr.h</FONT></TT></B>), containing the types and interfacing data structures definitions, functions prototypes, and quite exhaustive description for all the above, and how to integrate them within applications, is provided by the SDK package as an API for developers, together with other (<B><TT><FONT SIZE=+1 color="#008000">DLLs, readme and license.txt</FONT></TT></B>) necessary files.
+A <FONT color="#D00000">Windows / 32-bit C/C++</FONT> header file (i.e. <B><TT><FONT SIZE=+1 color="#008000">lpr.h</FONT></TT></B>), containing the types and interfacing data structures definitions, functions prototypes, and quite exhaustive description for all the above, and how to integrate them within applications, is provided by the SDK package as an API for developers, together with other (<B><TT><FONT SIZE=+1 color="#008000">DLLs, readme and license.txt</FONT></TT></B>) necessary files.
 <br><br>
 For using the library with other development languages or programming models (e.g. VB, DELPHI, .NET framework, etc.), the contents of this C/C++ header file should be appropriately translated and inserted in the respective source code, or appropriate wrappers have to be built (taking care to preserve the data and functions types, sizes, and calling conventions compatibilities, respectively).
 <br><br>
@@ -144,13 +143,13 @@ Each copy of the <b>VEDA LPR engine SDK/API</b> is individualized through a spec
 
 <H1>
 <BR>
-<B><FONT SIZE=+1 color="#000080">THE DEMO SDK / API RELEASE</FONT></B>
+<FONT SIZE="+1" color="#000080">THE DEMO SDK / API RELEASE</FONT>
 </H1>
 
 <UL>
 <P>
 
-The Demo consists of a &quot;fake&quot; / &quot;dummy&quot; (and partial) <b>VEDA LPR engine SDK/API</b> for <FONT color="#f00000">Windows / 32-bit</FONT>. It may be used, as a temporary substitute for the real one, solely for application(s) development / integration test and evaluation purposes. It doesn't provide real results, but, instead, some &quot;dummy&quot; ones. However, it certainly may be helpful while developing applications and want to estimate the programming effort and test the integration mechanisms (i.e. functions calls, parameters and i/o data exchange) before getting and using the real VEDA LPR engine functionality.
+The Demo consists of a &quot;fake&quot; / &quot;dummy&quot; (and partial) <b>VEDA LPR engine SDK/API</b> for <FONT color="#D00000">Windows / 32-bit</FONT>. It may be used, as a temporary substitute for the real one, solely for application(s) development / integration test and evaluation purposes. It doesn't provide real results, but, instead, some &quot;dummy&quot; ones. However, it certainly may be helpful while developing applications and want to estimate the programming effort and test the integration mechanisms (i.e. functions calls, parameters and i/o data exchange) before getting and using the real VEDA LPR engine functionality.
 <br><br>
 This &quot;fake&quot; SDK / API allows developers to:
 <ul>
@@ -181,7 +180,7 @@ This &quot;fake&quot; SDK / API allows developers to:
 
 <H1>
 <BR>
-<B><FONT SIZE=+1 color="#000080"><a name="download">DEMO SDK DOWNLOADING</a></FONT></B><font face="arial" size=-1> (aprox. 540 Kb)</font>
+<FONT SIZE="+1" color="#000080"><a name="download">DEMO SDK DOWNLOADING</a></FONT><font size="-1"> (aprox. 540 Kb)</font>
 </H1>
 
 <UL>
@@ -226,8 +225,6 @@ Any feedback upon our <B>VEDA LPR engine SDK/API</B> will be always welcomed.
 </P>
 </UL>
 
-</FONT>
-
 <HR WIDTH="100%">
 
 <CENTER>
@@ -239,6 +236,8 @@ Any feedback upon our <B>VEDA LPR engine SDK/API</B> will be always welcomed.
 </CENTER>
 
 <HR WIDTH="100%">
+
+</FONT>
 
 </BODY>
 </HTML>
