@@ -1,8 +1,11 @@
 # ---------------------------------------------------------------------------------------
+# SimpleOpt's Optimizer module - (c) 2003 Dan Mugurel Ontanu & Mihnea Horia Vrejoiu
+# *** This is the Python 3.x version - (c) 2020 Mihnea Horia Vrejoiu ***
 # ---------------------------------------------------------------------------------------
 
 import sys
-import math
+#import math
+
 from random import Random
 
 # ---------------------------------------------------------------------------------------
@@ -12,8 +15,10 @@ MAX_CANDIDATE_TRIALS = 25
 MAX_SEARCH_DEPTH     = 500
 
 Graphics_Available = 1
-try: import Gnuplot
-except: Graphics_Available = 0
+try:
+   import Gnuplot
+except:
+   Graphics_Available = 0
 
 # ---------------------------------------------------------------------------------------
 # Converts an integer into a "n" binary digits list, using the H2B table
@@ -27,11 +32,15 @@ H2B = { '0': "0000", '1': "0001", '2': "0010", '3': "0011",
 
 def int2bin(x, n):
    out = ""
-   for digit in hex(x)[2:]: out += H2B[digit]
+   for digit in hex(x)[2:]:
+      out += H2B[digit]
    d = n - len(out)
-   if d >= 0: out = list('0'*d + out)
-   else:      out = list(out[-d:])
-   return map(int, out)
+   if d >= 0:
+      out = list('0'*d + out)
+   else:
+      out = list(out[-d:])
+
+   return list(map(int, out))
 
 # ---------------------------------------------------------------------------------------
 # Prints a tuple (x, fx), where x is a list of real numbers, fx a real number
@@ -91,7 +100,8 @@ class SimpleOpt:
       for i in range(n_corners):
          mask = int2bin(i, n_dimensions)
          x = []
-         for i in range(n_dimensions): x.append(bounds[i][mask[i]])
+         for i in range(n_dimensions):
+            x.append(bounds[i][mask[i]])
          corners.append(x)
 
       return corners
@@ -103,7 +113,8 @@ class SimpleOpt:
       bounds = self.problem.bounds
 
       for i in range(nr_coords):
-         if x[i] < bounds[i][0] or x[i] > bounds[i][1]: return 0
+         if x[i] < bounds[i][0] or x[i] > bounds[i][1]:
+            return 0
 
       return 1
 
@@ -111,18 +122,25 @@ class SimpleOpt:
 
    def in_constraints(self, x):
       for i in range(self.problem.n_constraints):
-         if self.problem.constraint(i, x) > 0: return 0
+         if self.problem.constraint(i, x) > 0:
+            return 0
 
       return 1
 
 # ---------------------------------------------------------------------------------------
 
    def allowed(self, x):
-      # Test if the point x belongs to the problem "box"
-      if not self.in_box(x): return 0
+      # Test if the point x belongs to the problem "box" and  satisfies the constraints
+
+#      if not self.in_box(x):
+#         return 0
 
       # Ok, now test if it satisfies the constraints
-      if not self.in_constraints(x): return 0
+#      if not self.in_constraints(x):
+#         return 0
+
+      if not self.in_box(x) or not self.in_constraints(x):
+         return 0
 
       # All tests passed.
       return 1
@@ -138,7 +156,8 @@ class SimpleOpt:
          for i in range(n_dimensions):
             x.append(self.rnd.uniform(bounds[i][0], bounds[i][1]))
 
-         if self.allowed(x): return x
+         if self.allowed(x):
+            return x
 
       return []
 
@@ -153,7 +172,8 @@ class SimpleOpt:
          z = []
          for i in range(n_dimensions):
             z.append((1.0 - t) * corner[i] + t * seed[i])
-         if self.in_constraints(z): return z
+         if self.in_constraints(z):
+            return z
          t += 0.0001
 
       return []
@@ -182,16 +202,23 @@ class SimpleOpt:
 
 # ---------------------------------------------------------------------------------------
 
-   def compare(self, x, y):
-      if x[1] > y[1]: return 1
-      elif x[1] < y[1]: return -1
-      else: return 0
+#   def compare(self, x, y):
+#      if x[1] > y[1]:
+#         return 1
+#      elif x[1] < y[1]:
+#         return -1
+#      else:
+#         return 0
 
 # ---------------------------------------------------------------------------------------
 
    def get_best_candidates(self, candidates):
-      candidates.sort(self.compare)
-      candidates.reverse()
+      import operator
+
+#      candidates.sort(self.compare)
+#      candidates.reverse()
+
+      candidates.sort(key = operator.itemgetter(1), reverse = True)
 
       best = []
       for candidate in candidates:
@@ -205,11 +232,13 @@ class SimpleOpt:
 
    def onesearch(self, x):
       candidates = self.get_candidates(x[0])              # list of tuples (x, f(x))
+
       maybe_next = self.get_best_candidates(candidates)   # list of tuples (x, f(x))
 
       if len(maybe_next) > 0:
          self.crt_best = maybe_next[0]
-         if self.use_backtracking: self.backtrack += maybe_next[1:]
+         if self.use_backtracking:
+            self.backtrack += maybe_next[1:]
 
          if self.better(self.crt_best, self.abs_best):
             self.abs_best = self.crt_best
@@ -218,12 +247,15 @@ class SimpleOpt:
 
          return "success"
 
-      if self.search_depth == self.max_search_depth: return "fail"
+      if self.search_depth == self.max_search_depth:
+         return "fail"
+
       self.search_depth += 1
 
       for candidate in candidates:
          result = self.onesearch(candidate)
-         if result != "fail": return result
+         if result != "fail":
+            return result
 
       return "fail"
 
@@ -235,7 +267,7 @@ class SimpleOpt:
       else:
          self.logfd = open(self.problem.name + ".log", "a")
 
-      print text
+      print(text)
       self.logfd.write(text + '\n')
 
       self.logfd.close()
@@ -244,35 +276,46 @@ class SimpleOpt:
 # ---------------------------------------------------------------------------------------
 
    def optsearch(self):
+#      import time
+      import datetime
+
+      date_time = datetime.datetime.now()
+
       self.logged_print("")
-      self.logged_print("SIMPLEOPT search process started.")
+      self.logged_print("SIMPLEOPT started (" + date_time.strftime("%Y-%b-%d %H:%M:%S") + ")")
       self.logged_print("-" * 75)
       self.logged_print("")
-      self.logged_print("Choosing a starting point. Please wait...")
-      self.logged_print("")
+#      self.logged_print("Choosing a starting point...")
+#      self.logged_print("")
 
       # Try to select a suitable starting point (the "initial best")
 
-      if self.problem.seedpoint == None:
+      seed = self.problem.seedpoint
+      if seed == None:
          seed = self.seedpoint()
          if len(seed) == 0:
             self.logged_print("Cannot find a suitable starting point!\nPlease, run SIMPLEOPT again.")
             return
       else:
-         seed = self.problem.seedpoint
          if not self.allowed(seed):
             self.logged_print("The given seed point is out of problem space!\nCan run SIMPLEOPT again with an acceptable seed point.")
             return
 
       corners = self.boxcorners()
-
+      n_searches = len(corners)
+      n = 0
       for c in corners:
-         self.logged_print("Search process (re)started.")
-         print "(Can use Ctrl+C to interrupt it)..."
+         n += 1
+         self.logged_print("")
+         self.logged_print("Search process #%d of %d started." % (n, n_searches))
+         print("(Can use Ctrl+C to interrupt it)...")
          self.logged_print("")
 
+         date_time1 = datetime.datetime.now()
+
          x = self.startpoint(seed, c)
-         if len(x) == 0: continue
+         if len(x) == 0:
+            continue
 
          fx = self.problem.of(x)
          self.abs_best = self.crt_best = (x, fx)
@@ -285,50 +328,76 @@ class SimpleOpt:
 
          try:
             i = 1
+
             while i < self.max_steps:
                self.search_depth = 0
-               result = self.onesearch(self.crt_best)
+
+               result = 'none'
+               try:
+                  result = self.onesearch(self.crt_best)
+               except:
+                  pass
+
+               if result == "none":
+                  self.logged_print("Sorry, exception problem encountered... No result.\n")
+                  break
 
                if result == "fail":
                   if self.use_backtracking:
-                     if len(self.backtrack) == 0: break
+                     if len(self.backtrack) == 0:
+                        break
                      self.crt_best = self.backtrack[len(self.backtrack) - 1]
                      self.backtrack = self.backtrack[:-1]
-                  else: break
+                  else:
+                     break
 
-               if result == "abs_success": i += 1
+               if result == "abs_success":
+                  i += 1
 
-               print " " * 79 + "\r",   # clean up the "statistics" line
-               print "Step: %6d\tDepth: %3d\tBack: %5d\tBest: %12.6f" % (i, self.search_depth, len(self.backtrack), self.abs_best[1]) + "\r",
+               print(" " * 79 + "\r", end = '')   # clean up the "statistics" line
+               print("Step: %6d\tDepth: %3d\tBack: %5d\tBest: %12.6f\r" % (i, self.search_depth, len(self.backtrack), self.abs_best[1]), end = '')
                sys.stdout.flush()
-         except: pass
+#               time.sleep(0.01)
+         except:
+            pass
 
-         print " " * 79 + "\r",   # clean up the "statistics" line
+         print(" " * 79 + "\r", end = '')   # clean up the "statistics" line
+
+         date_time = datetime.datetime.now() - date_time1
 
          # Plot the graph of the objective function value versus iteration number
 
          if self.use_graphics:
             self.g.plot(zip(range(len(self.toplot)), self.toplot))
-            raw_input('Press <Enter> to continue...\n')
+            input("Press <Enter> to continue...")
 
          # Show what we found
 
          self.logged_print("Final best:")
          self.logged_print(point_to_string(self.abs_best))
-         self.logged_print("Found in %d iteration(s) of %d allowed.\n" % (i, self.max_steps))
+         self.logged_print("Found in %d iteration(s) of %d allowed." % (i, self.max_steps))
+         self.logged_print("Processing time: " + str(date_time))
+         self.logged_print("")
 
-         if c == corners[len(corners) - 1]: break
+#         if c == corners[len(corners) - 1]:
+         if n == n_searches:
+            break
 
-         option = raw_input("Interrupt the search process? (y/n) ")
-         if option == 'y' or option == 'Y': break
-         print
+         option = input("Still %d of %d tries left. Interrupt now? (y/n) " % (n_searches - n, n_searches))
+         if option == 'y' or option == 'Y':
+            break
+         print ("\n")
 
          self.reset()
 
+      date_time = datetime.datetime.now()
+
+      self.logged_print("")
       self.logged_print("-" * 75)
       self.logged_print("")
-      self.logged_print("SIMPLEOPT search process finished.\nThanks for your patience.")
+      self.logged_print("SIMPLEOPT finished (" + date_time.strftime("%Y-%b-%d %H:%M:%S") + ")")
       self.logged_print("")
 
 # ---------------------------------------------------------------------------------------
+#
 # ---------------------------------------------------------------------------------------

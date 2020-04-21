@@ -1,15 +1,17 @@
 # ---------------------------------------------------------------------------------------
+# SimpleOpt's Problem module - (c) 2003 Dan Mugurel Ontanu & Mihnea Horia Vrejoiu
+# *** This is the Python 3.x version - (c) 2020 Mihnea Horia Vrejoiu ***
 # ---------------------------------------------------------------------------------------
 
 import sys
 from random import Random
 
 # ---------------------------------------------------------------------------------------
-# ---------------------------------------------------------------------------------------
 
 MAX_U_POINTS = 1000
 
 # ---------------------------------------------------------------------------------------
+#
 # ---------------------------------------------------------------------------------------
 
 class Problem:
@@ -37,6 +39,7 @@ class Problem:
       pass
 
 # ---------------------------------------------------------------------------------------
+#
 # ---------------------------------------------------------------------------------------
 
 class EU_Problem:
@@ -56,9 +59,9 @@ class EU_Problem:
       # We tabulate the utility function, retaining all the pairs (x, u(x))
       # in the list U
 
-      print
-      print "EU_Problem initialization:"
-      print "Tabulating the utility function (over %d points)... " % MAX_U_POINTS,
+      print("\n")
+      print("EU_Problem initialization:\n")
+      print("Tabulating the utility function (over %d points)... " % (MAX_U_POINTS))
       sys.stdout.flush()
 
       self.U = []
@@ -68,9 +71,9 @@ class EU_Problem:
             x.append(self.rnd.uniform(ubounds[i][0], ubounds[i][1]))
          self.U.append((x, self.utility(x)))
 
-      print "done."
+      print("done.\n")
       sys.stdout.flush()
-      print
+      print("\n")
 
 
    # Stub for the utility function
@@ -103,4 +106,5 @@ class EU_Problem:
       return sum
 
 # ---------------------------------------------------------------------------------------
+#
 # ---------------------------------------------------------------------------------------
