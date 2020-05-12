@@ -1,11 +1,9 @@
 # ---------------------------------------------------------------------------------------
 # SimpleOpt's Optimizer module - (c) 2003 Dan Mugurel Ontanu & Mihnea Horia Vrejoiu
-# *** This is the Python 3.x version - (c) 2020 Mihnea Horia Vrejoiu ***
+#       *** This is the Python 3.x version - (c) 2020 Mihnea Horia Vrejoiu ***
 # ---------------------------------------------------------------------------------------
 
 import sys
-#import math
-
 from random import Random
 
 # ---------------------------------------------------------------------------------------
@@ -15,10 +13,19 @@ MAX_CANDIDATE_TRIALS = 25
 MAX_SEARCH_DEPTH     = 500
 
 Graphics_Available = 1
-try:
-   import Gnuplot
-except:
-   Graphics_Available = 0
+if Graphics_Available:
+   use_GnuPlot = False
+   use_MatPlotLib = not use_GnuPlot
+
+   try:
+      if use_GnuPlot:
+         import Gnuplot
+      elif use_MatPlotLib:
+         import matplotlib.pyplot as plt
+      else:
+         Graphics_Available = 0
+   except:
+      Graphics_Available = 0
 
 # ---------------------------------------------------------------------------------------
 # Converts an integer into a "n" binary digits list, using the H2B table
@@ -60,6 +67,9 @@ def point_to_string(P):
 class SimpleOpt:
 
    def __init__(self, problem, max_steps, step_size, max_search_depth, user_wants_backtracking, user_wants_graphics):
+      if user_wants_graphics and not Graphics_Available:
+         print("\nProblems with graphic plotting support (GnuPlot or MatPlotLib).\n")
+
       self.problem = problem
       self.max_steps = max_steps
       self.step_size = step_size
@@ -75,9 +85,12 @@ class SimpleOpt:
       self.use_graphics = Graphics_Available and user_wants_graphics
 
       if self.use_graphics:
-         self.g = Gnuplot.Gnuplot()
-         self.g.title("Best solution vs. iteration")
-         self.g("set data style linespoints")
+         if use_GnuPlot:
+            self.g = Gnuplot.Gnuplot()
+         elif use_MatPlotLib:
+            self.plt = plt
+         else:
+            pass
 
 # ---------------------------------------------------------------------------------------
 
@@ -87,7 +100,13 @@ class SimpleOpt:
       self.crt_best = None
       self.backtrack = []
       self.toplot = []
-      if self.use_graphics: self.g.reset()
+      if self.use_graphics:
+         if use_GnuPlot: 
+            self.g.reset()
+         elif use_MatPlotLib:
+            self.plt.close()
+         else:
+            pass
 
 # ---------------------------------------------------------------------------------------
 
@@ -131,13 +150,6 @@ class SimpleOpt:
 
    def allowed(self, x):
       # Test if the point x belongs to the problem "box" and  satisfies the constraints
-
-#      if not self.in_box(x):
-#         return 0
-
-      # Ok, now test if it satisfies the constraints
-#      if not self.in_constraints(x):
-#         return 0
 
       if not self.in_box(x) or not self.in_constraints(x):
          return 0
@@ -217,7 +229,6 @@ class SimpleOpt:
 
 #      candidates.sort(self.compare)
 #      candidates.reverse()
-
       candidates.sort(key = operator.itemgetter(1), reverse = True)
 
       best = []
@@ -272,7 +283,6 @@ class SimpleOpt:
 
       self.logfd.close()
 
-
 # ---------------------------------------------------------------------------------------
 
    def optsearch(self):
@@ -285,8 +295,6 @@ class SimpleOpt:
       self.logged_print("SIMPLEOPT started (" + date_time.strftime("%Y-%b-%d %H:%M:%S") + ")")
       self.logged_print("-" * 75)
       self.logged_print("")
-#      self.logged_print("Choosing a starting point...")
-#      self.logged_print("")
 
       # Try to select a suitable starting point (the "initial best")
 
@@ -294,11 +302,11 @@ class SimpleOpt:
       if seed == None:
          seed = self.seedpoint()
          if len(seed) == 0:
-            self.logged_print("Cannot find a suitable starting point!\nPlease, run SIMPLEOPT again.")
+            self.logged_print("Can'\t find a suitable seed point!\nTry to run SIMPLEOPT again.\n")
             return
       else:
          if not self.allowed(seed):
-            self.logged_print("The given seed point is out of problem space!\nCan run SIMPLEOPT again with an acceptable seed point.")
+            self.logged_print("The given seed point is out of problem space!\nTry to run SIMPLEOPT again with an acceptable seed point.\n")
             return
 
       corners = self.boxcorners()
@@ -308,7 +316,7 @@ class SimpleOpt:
          n += 1
          self.logged_print("")
          self.logged_print("Search process #%d of %d started." % (n, n_searches))
-         print("(Can use Ctrl+C to interrupt it)...")
+         print("(Can use <Ctrl-C> to interrupt it)...")
          self.logged_print("")
 
          date_time1 = datetime.datetime.now()
@@ -339,7 +347,7 @@ class SimpleOpt:
                   pass
 
                if result == "none":
-                  self.logged_print("Sorry, exception problem encountered... No result.\n")
+                  self.logged_print("Sorry, canceled or exception encountered... No result.\n")
                   break
 
                if result == "fail":
@@ -357,19 +365,13 @@ class SimpleOpt:
                print(" " * 79 + "\r", end = '')   # clean up the "statistics" line
                print("Step: %6d\tDepth: %3d\tBack: %5d\tBest: %12.6f\r" % (i, self.search_depth, len(self.backtrack), self.abs_best[1]), end = '')
                sys.stdout.flush()
-#               time.sleep(0.01)
+#               time.sleep(0.005)
          except:
             pass
 
          print(" " * 79 + "\r", end = '')   # clean up the "statistics" line
 
          date_time = datetime.datetime.now() - date_time1
-
-         # Plot the graph of the objective function value versus iteration number
-
-         if self.use_graphics:
-            self.g.plot(zip(range(len(self.toplot)), self.toplot))
-            input("Press <Enter> to continue...")
 
          # Show what we found
 
@@ -379,14 +381,32 @@ class SimpleOpt:
          self.logged_print("Processing time: " + str(date_time))
          self.logged_print("")
 
-#         if c == corners[len(corners) - 1]:
+         # Plot the graph of the objective function value versus iteration number
+
+         if self.use_graphics:
+            if use_GnuPlot:
+               self.g.title("Best solution vs. iteration (Try #%d)" % (n))
+               self.g.xlabel("Iteration")
+               self.g.ylabel("Optimum value")
+               self.g("set data style linespoints")
+               self.g.plot(zip(range(len(self.toplot)), self.toplot))
+            elif use_MatPlotLib:
+               self.plt.title("Best solution vs. iteration (Try #%d)" % (n))
+               self.plt.xlabel("Iteration")
+               self.plt.ylabel("Optimum value")
+               self.plt.plot(range(len(self.toplot)), self.toplot)
+               self.plt.show()
+            else:
+               pass
+
          if n == n_searches:
             break
 
-         option = input("Still %d of %d tries left. Interrupt now? (y/n) " % (n_searches - n, n_searches))
-         if option == 'y' or option == 'Y':
+         option = input("Still %d of %d tries left. Interrupt now? (y/N) " % (n_searches - n, n_searches))
+         if option in ['y', 'Y']:
             break
-         print ("\n")
+
+         print("")
 
          self.reset()
 
@@ -394,7 +414,6 @@ class SimpleOpt:
 
       self.logged_print("")
       self.logged_print("-" * 75)
-      self.logged_print("")
       self.logged_print("SIMPLEOPT finished (" + date_time.strftime("%Y-%b-%d %H:%M:%S") + ")")
       self.logged_print("")
 

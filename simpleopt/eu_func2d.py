@@ -1,4 +1,11 @@
 # ---------------------------------------------------------------------------------------
+# Running mode configuration variables
+# ---------------------------------------------------------------------------------------
+
+use_backtracking = 0   # = 0 usually, no backtracking needed; = 1 otherwise
+show_graphics = 1   # = 1 to plot optimum value over iterations; = 0 otherwise
+
+# ---------------------------------------------------------------------------------------
 # Mandatory imports:
 #    - problem definition class
 #    - simple, general-purpose optimizer class
@@ -11,9 +18,27 @@ from simpleopt import SimpleOpt
 # Auxiliary imports
 # ---------------------------------------------------------------------------------------
 
-import math
-#import Numeric   # needed for plotting purposes
-#import Gnuplot   # needed for plotting purposes
+try:
+   import numpy as math
+except:
+   import math
+
+if show_graphics:
+   use_GnuPlot = False
+   use_MatPlotLib = not use_GnuPlot
+
+   try:
+      if use_GnuPlot:
+         import Numeric   # needed for plotting purposes
+         import Gnuplot   # needed for plotting purposes
+      elif use_MatPlotLib:
+         import matplotlib.pyplot as plt   # needed for plotting purposes
+      else:
+         show_graphics = 0
+         print("\nProblems with graphic plotting support (GnuPlot or MatPlotLib).\n")
+   except:
+      show_graphics = 0
+      print("\nProblems with graphic plotting support (GnuPlot or MatPlotLib).\n")
 
 # ---------------------------------------------------------------------------------------
 # Auxiliary data and function definitions
@@ -89,14 +114,16 @@ def myconstraint(i, a):
 # ---------------------------------------------------------------------------------------
 # Procedural definition of the probability distribution function PDF(x, a)
 # ---------------------------------------------------------------------------------------
-# It should be defined over the utility function domain, and personalised by
+# It should be defined over the utility function domain, and personalized by
 # a given "action"
 # ---------------------------------------------------------------------------------------
 
 def myPDF(x, a):
    # A unitary hump, centered at a given "action" a
+
    d = dist(x, a)
-   return math.exp(-(d*d / 0.01))
+   return math.exp(-(d * d  / 0.01))
+
 
 # ---------------------------------------------------------------------------------------
 # Program starting point
@@ -124,12 +151,12 @@ if __name__ == "__main__":
    #    - whether to use backtracking (1), or not (0)
    #    - whether to use graphics (1), or not (0)
 
-   so = SimpleOpt(myproblem, 100000, 0.1, 5, 0, 0)
+   so = SimpleOpt(myproblem, 100000, 0.1, 5, use_backtracking, show_graphics)
 
    # Start the optimizer
 
    so.optsearch()
 
 # ---------------------------------------------------------------------------------------
+#
 # ---------------------------------------------------------------------------------------
-

@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------------------------
 # SimpleOpt's Problem module - (c) 2003 Dan Mugurel Ontanu & Mihnea Horia Vrejoiu
-# *** This is the Python 3.x version - (c) 2020 Mihnea Horia Vrejoiu ***
+#      *** This is the Python 3.x version - (c) 2020 Mihnea Horia Vrejoiu ***
 # ---------------------------------------------------------------------------------------
 
 import sys
@@ -25,13 +25,11 @@ class Problem:
       self.constraint = myconstraint
       self.seedpoint = seedpoint
 
-
    # Returns a real number representing the value of the function to
    # be maximized, given a vector of real numbers as input
 
    def of(self, x):
       pass
-
 
    # Evaluates the constraint ci on given input x
 
@@ -59,9 +57,9 @@ class EU_Problem:
       # We tabulate the utility function, retaining all the pairs (x, u(x))
       # in the list U
 
-      print("\n")
-      print("EU_Problem initialization:\n")
-      print("Tabulating the utility function (over %d points)... " % (MAX_U_POINTS))
+      print("")
+      print("EU_Problem initialization:")
+      print("Tabulating the utility function (over %d points)... " % (MAX_U_POINTS), end = '')
       sys.stdout.flush()
 
       self.U = []
@@ -73,14 +71,11 @@ class EU_Problem:
 
       print("done.\n")
       sys.stdout.flush()
-      print("\n")
-
 
    # Stub for the utility function
 
    def utility(self, x):
       pass
-
 
    # Stub for the probability density function (PDF) which returns the
    # probability of x, given the "action" a
@@ -88,12 +83,10 @@ class EU_Problem:
    def PDF(self, x, a):
       pass
 
-
    # Evaluates the constraint ci on a given "action" a
 
    def constraint(self, ci, a):
       pass
-
 
    # Returns a real number representing the value of the function to
    # be maximized, given a vector of real numbers as input (an "action",

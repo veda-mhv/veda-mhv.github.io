@@ -15,7 +15,7 @@
 
 <BODY>
 
-<P align=center><FONT color=#008000>[Last updated on: Tuesday, April 21, 2020]</FONT></P>
+<P align=center><FONT color=#008000>[Last updated on: Tuesday, May 12, 2020]</FONT></P>
 <P align=center>&nbsp;</P>
 <P align=center>&lt; <a href="index.html">Go to SimpleOpt main page</a> &gt;</P>
 <P align=center>&nbsp;</P>
@@ -242,19 +242,19 @@ certain objective functions.</P>
 <P>&nbsp;</P>
 <P>In order to run yourself the above Python code, you 
 can:<BR>&nbsp;&nbsp;&nbsp; - either copy and paste the script from this page (as text only) 
-in a simple text file (e.g. <B>func1d.py</B>),<BR>&nbsp;&nbsp;&nbsp; - or, download the 
-<B>func1d.py</B> script directly from <a href="func1d.py">here</a>,<BR>and then use the 
-command:</P>
+in a simple text file (e.g. <B>func1d.py</B>),<BR>&nbsp;&nbsp;&nbsp; - or, preferably, 
+download the <B>func1d.py</B> script directly from <a href="func1d.py">here</a>,<BR>and 
+then use the command:</P>
 <P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; python 
 func1d.py</FONT></P>
 <P>Obviously, you should also have the optimizer modules already on your computer. 
-If not, you can download them now (<a href="simpleopt.zip">SimpleOpt for Python 3.x</a>,
-<a href="simpleopt-old.zip">SimpleOpt for Python <= 2.x</a>).</P>
+If not, you can download them now (choose one of: the new <a href="simpleopt.zip">SimpleOpt 
+for Python 3.x</a>, or the old <a href="simpleopt-old.zip">SimpleOpt for Python <= 2.x</a>).</P>
 <P><BR><B>REMARK:</B></P>
-<P>When running the above program, if the <B>numeric.py</B> and 
-<B>gnuplot.py</B> modules, and the <B>Gnuplot</B> utility for your operating 
-system, are installed on your computer, the <FONT face="Courier New" 
-size=2>optsearch</FONT> method also provides a graph representing the evolution 
+<P>When running the above program, if the <B>numeric.py</B> and <B>gnuplot.py</B> modules, 
+and the <B>Gnuplot</B> utility, or alternatively, the <B>MatPlotLib</B> library and 
+<B>numpy</B> module are installed on your computer, the <FONT face="Courier New" 
+size=2>optsearch</FONT> method can also provide a graph representing the evolution 
 of the objective function during the search of a local maximum. Such graphs are 
 represented in Figure 2.2, and 2.3 (and also further in section 4). In each of 
 them, "best solution" at iteration k, means the value of the function for the 
@@ -325,9 +325,9 @@ import SimpleOpt</FONT></P>
 -------------------------------------------------------------------<BR># 
 Auxiliary imports<BR># 
 -------------------------------------------------------------------</FONT></P>
-<P><FONT face="Courier New" size=2>import math<BR>import 
+<P><FONT face="Courier New" size=2>import math<BR>#import 
 Numeric&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # needed only for 
-plotting purposes<BR>import 
+plotting purposes<BR>#import 
 Gnuplot&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # needed only for 
 plotting purposes</FONT></P>
 <P><FONT face="Courier New" size=2># 
@@ -584,14 +584,14 @@ optimizer</FONT></P>
 -------------------------------------------------------------------</FONT></P>
 <P><BR>In order to run yourself the above Python code, you 
 can:<BR>&nbsp;&nbsp;&nbsp; - either copy and paste the script from this page (as text only) 
-in a simple text file (e.g. <B>func2d.py</B>),<BR>&nbsp;&nbsp;&nbsp; - or, download the 
-<B>func2d.py</B> script directly from <a href="func2d.py">here</a>,<BR>and then use the 
-command:</P>
+in a simple text file (e.g. <B>func2d.py</B>),<BR>&nbsp;&nbsp;&nbsp; - or, preferably, 
+download the <B>func2d.py</B> script directly from <a href="func2d.py">here</a>,<BR>and 
+then use the command:</P>
 <P><FONT face="Courier New" size=2>&nbsp;&nbsp;&nbsp; python 
 func2d.py</FONT></P>
-<P>Obviously, you should also have the optimizer modules already on your computer. 
-If not, you can download them now (<a href="simpleopt.zip">SimpleOpt for Python 3.x</a>,
-<a href="simpleopt-old.zip">SimpleOpt for Python <= 2.x</a>).</P>
+<P>Obviously, you should also have the optimizer modules already on your computer. If 
+not, you can download them now (choose one of: the new <a href="simpleopt.zip">SimpleOpt 
+for Python 3.x</a>, or the old <a href="simpleopt-old.zip">SimpleOpt for Python <= 2.x</a>).</P>
 <P>Please remember that on one run, only one maximum is found. To find all of 
 them, several trials should be considered.</P>
 <P>Figures 4.2 and 4.3 present the evolution of the searching process at each 
